@@ -2,9 +2,11 @@ package com.train.ticket.max12306;
 
 import com.train.ticket.max12306.common.HttpURL12306;
 import com.train.ticket.max12306.common.HttpURLConstant12306;
+import com.train.ticket.max12306.common.QueryTicketPriceRequest;
 import com.train.ticket.max12306.common.QueryTicketRequest;
 import com.train.ticket.max12306.entity.StationInfo;
 import com.train.ticket.max12306.entity.TicketInfo;
+import com.train.ticket.max12306.entity.TicketPrice;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
 import com.train.ticket.max12306.enumeration.TicketType;
 import com.train.ticket.max12306.mapper.StationInfoMapper;
@@ -70,17 +72,31 @@ class Max12306ApplicationTests {
             }
             LOGGER.info("\n\n==========================================================================================================================================================================\n\n");
             QueryTicketRequest request = new QueryTicketRequest();
-            request.setFromDate("2020-07-31");
+            request.setFromDate("2020-08-01");
             request.setFromStationCode("SHH");
-            request.setToStationCode("BJP");
+            request.setToStationCode("TYV");
             request.setTicketType(TicketType.TICKETS);
             List<TicketInfo> ticketInfos = HttpURL12306.parseTicketInfo(request);
             List<TicketInfo> offStreamTrain = ticketInfos.stream().filter(x -> x.getRemark().equals("列车停运")).collect(Collectors.toList());
             ticketInfos.removeAll(offStreamTrain);
             ticketInfos.addAll(offStreamTrain);
             ticketInfos.forEach(x -> {
+                QueryTicketPriceRequest priceRequest=new QueryTicketPriceRequest();
+                priceRequest.setTrainCode(x.getTrainCode());
+                priceRequest.setTrainNo(x.getTrainNo());
+                priceRequest.setTrainDate(x.getStartDate());
+                priceRequest.setFromStationNo(x.getFromStationNo());
+                priceRequest.setToStationNo(x.getToStationNo());
+                priceRequest.setSeatTypes(x.getSeatType());
+                TicketPrice ticketPrice=null;
+                try {
+                    ticketPrice=HttpURL12306.parseTicketPrice(priceRequest);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 LOGGER.info("\n车次:{}，出发站:{}，到达站:{}，出发时间:{}，到达时间:{}，历时:{}/hh:mm，\n" +
-                                "商务座/特等座:{}，一等座:{}，二等座:{}，高级软卧:{}，软卧:{}，动卧:{}，硬卧:{}，软座:{}，硬座:{}，无座:{}，其他:{}，备注:{}\n\n",
+                                "商务座/特等座:{}，一等座:{}，二等座:{}，高级软卧:{}，软卧:{}，动卧:{}，硬卧:{}，软座:{}，硬座:{}，无座:{}，其他:{}，备注:{}，座位类型:{}\n"+
+                                "{}",
                         x.getTrainCode(), x.getFromeStationName(), x.getToStationMame(), x.getFromTime(), x.getToTime(), x.getLastTime(),
                         StringUtils.isBlank(x.getBusinessSeatCount()) ? "--" : x.getBusinessSeatCount(),
                         StringUtils.isBlank(x.getFirstSeatCount()) ? "--" : x.getFirstSeatCount(),
@@ -92,7 +108,19 @@ class Max12306ApplicationTests {
                         StringUtils.isBlank(x.getSoftSeatCount()) ? "--" : x.getSoftSeatCount(),
                         StringUtils.isBlank(x.getHardSeatCount()) ? "--" : x.getHardSeatCount(),
                         StringUtils.isBlank(x.getNoneSeatCount()) ? "--" : x.getNoneSeatCount(),
-                        StringUtils.isBlank(x.getOther()) ? "--" : x.getOther(), x.getRemark());
+                        StringUtils.isBlank(x.getOther()) ? "--" : x.getOther(), x.getRemark(),
+                        StringUtils.isBlank(x.getSeatType()) ? "--" : x.getSeatType(),
+                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
+                        StringUtils.isBlank(ticketPrice.getM())?"[]":ticketPrice.getM(),
+                        StringUtils.isBlank(ticketPrice.getWZ())?"[]":ticketPrice.getWZ(),
+                        StringUtils.isBlank(ticketPrice.getA6())?"[]":ticketPrice.getA6(),
+                        StringUtils.isBlank(ticketPrice.getAI())?"[]":ticketPrice.getAI(),
+                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
+                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
+                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
+                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
+                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
+                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9());
             });
         } catch (Exception e) {
             e.printStackTrace();

@@ -5,6 +5,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.entity.StationInfo;
 import com.train.ticket.max12306.entity.TicketInfo;
+import com.train.ticket.max12306.entity.TicketPrice;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -101,9 +102,9 @@ public class HttpURL12306 {
                     }
                 }
                 LOGGER.info("======> 解析车站信息失败...");
-                return list;
             }
         }
+        return null;
     }
 
 
@@ -128,9 +129,9 @@ public class HttpURL12306 {
                 httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
                 httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
                 httpGet.addHeader(HttpHeaderParamter.COOKIE.getKey(), HttpHeaderParamter.COOKIE.getValue().
-                                                    replace("{1}", JSESSIONID).
-                                                    replace("{2}", RAIL_EXPIRATION).
-                                                    replace("{3}", RAIL_DEVICEID));
+                        replace("{1}", JSESSIONID).
+                        replace("{2}", RAIL_EXPIRATION).
+                        replace("{3}", RAIL_DEVICEID));
                 try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
                     HttpEntity httpEntity = httpResponse.getEntity();
                     String result = EntityUtils.toString(httpEntity);
@@ -146,7 +147,7 @@ public class HttpURL12306 {
                             // 车票信息
                             String[] ticketStrArray = ticketArray.toArray(new String[0]);
                             String map = data.get("map").toString();
-                            // 解析车票信息
+                            // 设置车票信息
                             list = settingTicketInfo(ticketStrArray);
                             if (!CollectionUtils.isEmpty(list)) {
                                 LOGGER.info("======> 解析车票信息成功...");
@@ -154,8 +155,58 @@ public class HttpURL12306 {
                             }
                         }
                     }
-                    LOGGER.info("======> 解析车站信息失败...");
-                    return list;
+                    LOGGER.info("======> 解析车票信息失败...");
+                }
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * 解析车票价格信息
+     *
+     * @param ticketPriceRequest
+     * @return
+     */
+    public static TicketPrice parseTicketPrice(QueryTicketPriceRequest ticketPriceRequest) throws Exception {
+        if (Objects.nonNull(ticketPriceRequest)) {
+            try (CloseableHttpClient httpClient = httpClientBuild()) {
+                HttpGet httpGet = new HttpGet(HttpURLConstant12306.TICKET_PRICE_QUERY_URL.
+                        replace("{1}", ticketPriceRequest.getTrainNo()).
+                        replace("{2}", ticketPriceRequest.getFromStationNo()).
+                        replace("{3}", ticketPriceRequest.getToStationNo()).
+                        replace("{4}", ticketPriceRequest.getSeatTypes()).
+                        replace("{5}", ticketPriceRequest.getTrainDate()));
+                httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+                httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+                httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+                httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+                httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+                httpGet.addHeader(HttpHeaderParamter.COOKIE.getKey(), HttpHeaderParamter.COOKIE.getValue().
+                        replace("{1}", JSESSIONID).
+                        replace("{2}", RAIL_EXPIRATION).
+                        replace("{3}", RAIL_DEVICEID));
+                try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
+                    HttpEntity httpEntity = httpResponse.getEntity();
+                    String result = EntityUtils.toString(httpEntity);
+                    // 释放资源
+                    EntityUtils.consume(httpEntity);
+                    TicketPrice ticketPrice = new TicketPrice();
+                    ticketPrice.setTrainCode(ticketPriceRequest.getTrainCode());
+                    ticketPrice.setTrainNo(ticketPriceRequest.getTrainNo());
+                    if (StringUtils.isNotBlank(result)) {
+                        JSONObject jsonObject = JSONUtil.parseObj(result);
+                        int status = (int) jsonObject.get("httpstatus");
+                        if (status == SUCCESS) {
+                            JSONObject data = (JSONObject) jsonObject.get("data");
+                            // 设置车票价格信息
+                            settingTicketPrice(data,ticketPriceRequest,ticketPrice);
+                            LOGGER.info("======> 解析车票价格成功...");
+                            return ticketPrice;
+                        }
+                    }
+                    LOGGER.info("======> 解析车票价格失败...");
                 }
             }
         }
@@ -210,6 +261,55 @@ public class HttpURL12306 {
             list.add(ticketInfo);
         }
         return list;
+    }
+
+    /**
+     * 设置车票价格信息
+     * @param data
+     * @param ticketPriceRequest
+     * @return
+     */
+    public static void settingTicketPrice(JSONObject data,QueryTicketPriceRequest ticketPriceRequest,TicketPrice ticketPrice){
+        switch (ticketPriceRequest.getTrainCode().toCharArray()[0]){
+            case 'G':
+                ticketPrice.setA9(data.get("A9",String.class));
+                ticketPrice.setM(data.get("M",String.class));
+                ticketPrice.setWZ(data.get("WZ",String.class));
+                ticketPrice.setO(data.get("O",String.class));
+                break;
+            case 'D':
+                ticketPrice.setM(data.get("M",String.class));
+                ticketPrice.setWZ(data.get("WZ",String.class));
+                ticketPrice.setAI(data.get("AI",String.class));
+                ticketPrice.setAJ(data.get("AJ",String.class));
+                ticketPrice.setO(data.get("O",String.class));
+                break;
+            case 'Z':
+                ticketPrice.setA6(data.get("A6",String.class));
+                ticketPrice.setA4(data.get("A4",String.class));
+                ticketPrice.setA3(data.get("A3",String.class));
+                ticketPrice.setA1(data.get("A1",String.class));
+                ticketPrice.setWZ(data.get("WZ",String.class));
+                break;
+            case 'T':
+                ticketPrice.setA4(data.get("A4",String.class));
+                ticketPrice.setA3(data.get("A3",String.class));
+                ticketPrice.setA1(data.get("A1",String.class));
+                ticketPrice.setWZ(data.get("WZ",String.class));
+                break;
+            case 'K':
+                ticketPrice.setA4(data.get("A4",String.class));
+                ticketPrice.setA3(data.get("A3",String.class));
+                ticketPrice.setA1(data.get("A1",String.class));
+                ticketPrice.setWZ(data.get("WZ",String.class));
+                break;
+            default:
+                ticketPrice.setA4(data.get("A4",String.class));
+                ticketPrice.setA3(data.get("A3",String.class));
+                ticketPrice.setA1(data.get("A1",String.class));
+                ticketPrice.setWZ(data.get("WZ",String.class));
+                break;
+        }
     }
 
     /**
