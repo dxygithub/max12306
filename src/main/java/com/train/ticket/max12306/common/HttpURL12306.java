@@ -201,7 +201,7 @@ public class HttpURL12306 {
                         if (status == SUCCESS) {
                             JSONObject data = (JSONObject) jsonObject.get("data");
                             // 设置车票价格信息
-                            settingTicketPrice(data,ticketPriceRequest,ticketPrice);
+                            settingTicketPrice(data, ticketPriceRequest, ticketPrice);
                             LOGGER.info("======> 解析车票价格成功...");
                             return ticketPrice;
                         }
@@ -265,49 +265,82 @@ public class HttpURL12306 {
 
     /**
      * 设置车票价格信息
+     *
      * @param data
      * @param ticketPriceRequest
      * @return
      */
-    public static void settingTicketPrice(JSONObject data,QueryTicketPriceRequest ticketPriceRequest,TicketPrice ticketPrice){
-        switch (ticketPriceRequest.getTrainCode().toCharArray()[0]){
+    public static void settingTicketPrice(JSONObject data, QueryTicketPriceRequest ticketPriceRequest, TicketPrice ticketPrice) {
+        switch (ticketPriceRequest.getTrainCode().toCharArray()[0]) {
             case 'G':
-                ticketPrice.setA9(data.get("A9",String.class));
-                ticketPrice.setM(data.get("M",String.class));
-                ticketPrice.setWZ(data.get("WZ",String.class));
-                ticketPrice.setO(data.get("O",String.class));
+                ticketPrice.setA9(data.get("A9", String.class));
+                ticketPrice.setM(data.get("M", String.class));
+                ticketPrice.setWZ(data.get("WZ", String.class));
+                ticketPrice.setO(data.get("O", String.class));
+
+                ticketPrice.setBusinessSeatPrice(ticketPrice.getA9());
+                ticketPrice.setFirstSeatPrice(ticketPrice.getM());
+                ticketPrice.setSecondSeatPrice(ticketPrice.getWZ());
+                ticketPrice.setNoneSeatPrice(ticketPrice.getO());
                 break;
             case 'D':
-                ticketPrice.setM(data.get("M",String.class));
-                ticketPrice.setWZ(data.get("WZ",String.class));
-                ticketPrice.setAI(data.get("AI",String.class));
-                ticketPrice.setAJ(data.get("AJ",String.class));
-                ticketPrice.setO(data.get("O",String.class));
+                ticketPrice.setM(data.get("M", String.class));
+                ticketPrice.setWZ(data.get("WZ", String.class));
+                ticketPrice.setAI(data.get("AI", String.class));
+                ticketPrice.setAJ(data.get("AJ", String.class));
+                ticketPrice.setO(data.get("O", String.class));
+
+                ticketPrice.setFirstSeatPrice(ticketPrice.getM());
+                ticketPrice.setSecondSeatPrice(ticketPrice.getWZ());
+                ticketPrice.setSoftSleepPrice(ticketPrice.getAI());
+                ticketPrice.setHardSleepPrice(ticketPrice.getAJ());
+                ticketPrice.setNoneSeatPrice(ticketPrice.getO());
                 break;
             case 'Z':
-                ticketPrice.setA6(data.get("A6",String.class));
-                ticketPrice.setA4(data.get("A4",String.class));
-                ticketPrice.setA3(data.get("A3",String.class));
-                ticketPrice.setA1(data.get("A1",String.class));
-                ticketPrice.setWZ(data.get("WZ",String.class));
+                ticketPrice.setA6(data.get("A6", String.class));
+                ticketPrice.setA4(data.get("A4", String.class));
+                ticketPrice.setA3(data.get("A3", String.class));
+                ticketPrice.setA1(data.get("A1", String.class));
+                ticketPrice.setWZ(data.get("WZ", String.class));
+
+                ticketPrice.setHighSoftSleepPrice(ticketPrice.getA6());
+                ticketPrice.setSoftSleepPrice(ticketPrice.getA4());
+                ticketPrice.setHardSleepPrice(ticketPrice.getA3());
+                ticketPrice.setHardSeatPrice(ticketPrice.getA1());
+                ticketPrice.setNoneSeatPrice(ticketPrice.getWZ());
                 break;
             case 'T':
-                ticketPrice.setA4(data.get("A4",String.class));
-                ticketPrice.setA3(data.get("A3",String.class));
-                ticketPrice.setA1(data.get("A1",String.class));
-                ticketPrice.setWZ(data.get("WZ",String.class));
+                ticketPrice.setA4(data.get("A4", String.class));
+                ticketPrice.setA3(data.get("A3", String.class));
+                ticketPrice.setA1(data.get("A1", String.class));
+                ticketPrice.setWZ(data.get("WZ", String.class));
+
+                ticketPrice.setSoftSleepPrice(ticketPrice.getA4());
+                ticketPrice.setHardSleepPrice(ticketPrice.getA3());
+                ticketPrice.setHardSeatPrice(ticketPrice.getA1());
+                ticketPrice.setNoneSeatPrice(ticketPrice.getWZ());
                 break;
             case 'K':
-                ticketPrice.setA4(data.get("A4",String.class));
-                ticketPrice.setA3(data.get("A3",String.class));
-                ticketPrice.setA1(data.get("A1",String.class));
-                ticketPrice.setWZ(data.get("WZ",String.class));
+                ticketPrice.setA4(data.get("A4", String.class));
+                ticketPrice.setA3(data.get("A3", String.class));
+                ticketPrice.setA1(data.get("A1", String.class));
+                ticketPrice.setWZ(data.get("WZ", String.class));
+
+                ticketPrice.setSoftSleepPrice(ticketPrice.getA4());
+                ticketPrice.setHardSleepPrice(ticketPrice.getA3());
+                ticketPrice.setHardSeatPrice(ticketPrice.getA1());
+                ticketPrice.setNoneSeatPrice(ticketPrice.getWZ());
                 break;
             default:
-                ticketPrice.setA4(data.get("A4",String.class));
-                ticketPrice.setA3(data.get("A3",String.class));
-                ticketPrice.setA1(data.get("A1",String.class));
-                ticketPrice.setWZ(data.get("WZ",String.class));
+                ticketPrice.setA4(data.get("A4", String.class));
+                ticketPrice.setA3(data.get("A3", String.class));
+                ticketPrice.setA1(data.get("A1", String.class));
+                ticketPrice.setWZ(data.get("WZ", String.class));
+
+                ticketPrice.setSoftSleepPrice(ticketPrice.getA4());
+                ticketPrice.setHardSleepPrice(ticketPrice.getA3());
+                ticketPrice.setHardSeatPrice(ticketPrice.getA1());
+                ticketPrice.setNoneSeatPrice(ticketPrice.getWZ());
                 break;
         }
     }

@@ -72,7 +72,7 @@ class Max12306ApplicationTests {
             }
             LOGGER.info("\n\n==========================================================================================================================================================================\n\n");
             QueryTicketRequest request = new QueryTicketRequest();
-            request.setFromDate("2020-08-01");
+            request.setFromDate("2020-08-03");
             request.setFromStationCode("SHH");
             request.setToStationCode("TYV");
             request.setTicketType(TicketType.TICKETS);
@@ -81,22 +81,22 @@ class Max12306ApplicationTests {
             ticketInfos.removeAll(offStreamTrain);
             ticketInfos.addAll(offStreamTrain);
             ticketInfos.forEach(x -> {
-                QueryTicketPriceRequest priceRequest=new QueryTicketPriceRequest();
+                QueryTicketPriceRequest priceRequest = new QueryTicketPriceRequest();
                 priceRequest.setTrainCode(x.getTrainCode());
                 priceRequest.setTrainNo(x.getTrainNo());
-                priceRequest.setTrainDate(x.getStartDate());
+                priceRequest.setTrainDate("2020-08-03");
                 priceRequest.setFromStationNo(x.getFromStationNo());
                 priceRequest.setToStationNo(x.getToStationNo());
                 priceRequest.setSeatTypes(x.getSeatType());
-                TicketPrice ticketPrice=null;
+                TicketPrice ticketPrice = null;
                 try {
-                    ticketPrice=HttpURL12306.parseTicketPrice(priceRequest);
+                    ticketPrice = HttpURL12306.parseTicketPrice(priceRequest);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
                 LOGGER.info("\n车次:{}，出发站:{}，到达站:{}，出发时间:{}，到达时间:{}，历时:{}/hh:mm，\n" +
-                                "商务座/特等座:{}，一等座:{}，二等座:{}，高级软卧:{}，软卧:{}，动卧:{}，硬卧:{}，软座:{}，硬座:{}，无座:{}，其他:{}，备注:{}，座位类型:{}\n"+
-                                "{}",
+                                "商务座/特等座:{}，一等座:{}，二等座:{}，高级软卧:{}，软卧:{}，动卧:{}，硬卧:{}，软座:{}，硬座:{}，无座:{}，其他:{}，备注:{}，座位类型:{}\n" +
+                                "{}，{}，{}，{}，{}，{}，{}，{}，{}，{}，{}\n",
                         x.getTrainCode(), x.getFromeStationName(), x.getToStationMame(), x.getFromTime(), x.getToTime(), x.getLastTime(),
                         StringUtils.isBlank(x.getBusinessSeatCount()) ? "--" : x.getBusinessSeatCount(),
                         StringUtils.isBlank(x.getFirstSeatCount()) ? "--" : x.getFirstSeatCount(),
@@ -110,17 +110,17 @@ class Max12306ApplicationTests {
                         StringUtils.isBlank(x.getNoneSeatCount()) ? "--" : x.getNoneSeatCount(),
                         StringUtils.isBlank(x.getOther()) ? "--" : x.getOther(), x.getRemark(),
                         StringUtils.isBlank(x.getSeatType()) ? "--" : x.getSeatType(),
-                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
-                        StringUtils.isBlank(ticketPrice.getM())?"[]":ticketPrice.getM(),
-                        StringUtils.isBlank(ticketPrice.getWZ())?"[]":ticketPrice.getWZ(),
-                        StringUtils.isBlank(ticketPrice.getA6())?"[]":ticketPrice.getA6(),
-                        StringUtils.isBlank(ticketPrice.getAI())?"[]":ticketPrice.getAI(),
-                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
-                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
-                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
-                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
-                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9(),
-                        StringUtils.isBlank(ticketPrice.getA9())?"[]":ticketPrice.getA9());
+                        StringUtils.isBlank(ticketPrice.getBusinessSeatPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getBusinessSeatPrice()),
+                        StringUtils.isBlank(ticketPrice.getFirstSeatPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getFirstSeatPrice()),
+                        StringUtils.isBlank(ticketPrice.getSecondSeatPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getSecondSeatPrice()),
+                        StringUtils.isBlank(ticketPrice.getHighSoftSleepPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getHighSoftSleepPrice()),
+                        StringUtils.isBlank(ticketPrice.getSoftSleepPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getSoftSleepPrice()),
+                        StringUtils.isBlank(ticketPrice.getMotorSleepPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getMotorSleepPrice()),
+                        StringUtils.isBlank(ticketPrice.getHardSleepPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getHardSleepPrice()),
+                        StringUtils.isBlank(ticketPrice.getSoftSeatPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getSoftSeatPrice()),
+                        StringUtils.isBlank(ticketPrice.getHardSeatPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getHardSeatPrice()),
+                        StringUtils.isBlank(ticketPrice.getNoneSeatPrice()) ? "[--]" : String.format("[%s]", ticketPrice.getNoneSeatPrice()),
+                        "[--]");
             });
         } catch (Exception e) {
             e.printStackTrace();
