@@ -1,6 +1,7 @@
 package com.train.ticket.max12306.service.impl;
 
 import cloud.gouyiba.core.constructor.QueryWrapper;
+import com.train.ticket.max12306.common.HttpURL12306;
 import com.train.ticket.max12306.entity.StationInfo;
 import com.train.ticket.max12306.mapper.StationInfoMapper;
 import com.train.ticket.max12306.service.StationInfoService;
@@ -10,9 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @ClassName StationInfoServiceImpl
@@ -44,13 +44,39 @@ public class StationInfoServiceImpl implements StationInfoService {
     }
 
     /**
-     * 获取所有车站信息
+     * 获取所有车站信息：DB获取，已去重,已排序
      *
      * @return
      */
     @Override
     public List<StationInfo> getAllStationInfo() {
         List<StationInfo> stationInfos = stationInfoMapper.selectList(new QueryWrapper<>().orderBy("station_sort", QueryWrapper.ASC));
+        return CollectionUtils.isEmpty(stationInfos) ? Collections.emptyList() : stationInfos;
+    }
+
+    /**
+     * 直接获取车站信息: 请求12306
+     *
+     * @return
+     */
+    public List<StationInfo> directGetStationInfo() {
+        List<StationInfo> stationInfos = null;
+        try {
+            stationInfos = HttpURL12306.parseStationInfo();
+            if (!CollectionUtils.isEmpty(stationInfos)) {
+                // 车站信息去重，直接请求12306获取到的车站信息可能会有重复的
+                stationInfos = stationInfos.stream().collect(
+                        Collectors.collectingAndThen(Collectors.toCollection(
+                                () -> new TreeSet<>(
+                                        Comparator.comparing(StationInfo::getStationCode)
+                                )
+                        ), ArrayList::new));
+                // 车站排序
+                stationInfos = stationInfos.stream().sorted(Comparator.comparing(StationInfo::getStationSort)).collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return CollectionUtils.isEmpty(stationInfos) ? Collections.emptyList() : stationInfos;
     }
 }

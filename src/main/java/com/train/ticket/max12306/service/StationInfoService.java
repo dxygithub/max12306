@@ -24,4 +24,10 @@ public interface StationInfoService {
      * @return
      */
     List<StationInfo> getAllStationInfo();
+
+    /**
+     * 直接获取车站信息: 请求12306
+     * @return
+     */
+    List<StationInfo> directGetStationInfo();
 }
