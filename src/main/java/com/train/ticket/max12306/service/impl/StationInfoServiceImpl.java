@@ -64,15 +64,8 @@ public class StationInfoServiceImpl implements StationInfoService {
         try {
             stationInfos = HttpURL12306.parseStationInfo();
             if (!CollectionUtils.isEmpty(stationInfos)) {
-                // 车站信息去重，直接请求12306获取到的车站信息可能会有重复的
-                stationInfos = stationInfos.stream().collect(
-                        Collectors.collectingAndThen(Collectors.toCollection(
-                                () -> new TreeSet<>(
-                                        Comparator.comparing(StationInfo::getStationCode)
-                                )
-                        ), ArrayList::new));
-                // 车站排序
-                stationInfos = stationInfos.stream().sorted(Comparator.comparing(StationInfo::getStationSort)).collect(Collectors.toList());
+                // 车站信息去重排序，直接请求12306获取到的车站信息可能会有重复的
+                stationInfos = stationInfos.stream().filter(HttpURL12306.distinctByKey(StationInfo::getStationCode)).sorted(Comparator.comparing(StationInfo::getStationSort)).collect(Collectors.toList());
             }
         } catch (Exception e) {
             e.printStackTrace();

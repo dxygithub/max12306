@@ -72,7 +72,7 @@ class Max12306ApplicationTests {
             }
             LOGGER.info("\n\n==========================================================================================================================================================================\n\n");
             QueryTicketRequest request = new QueryTicketRequest();
-            request.setFromDate("2020-08-03");
+            request.setFromDate("2020-08-13");
             request.setFromStationCode("SHH");
             request.setToStationCode("TYV");
             request.setTicketType(TicketType.TICKETS);
@@ -84,7 +84,7 @@ class Max12306ApplicationTests {
                 QueryTicketPriceRequest priceRequest = new QueryTicketPriceRequest();
                 priceRequest.setTrainCode(x.getTrainCode());
                 priceRequest.setTrainNo(x.getTrainNo());
-                priceRequest.setTrainDate("2020-08-03");
+                priceRequest.setTrainDate("2020-08-13");
                 priceRequest.setFromStationNo(x.getFromStationNo());
                 priceRequest.setToStationNo(x.getToStationNo());
                 priceRequest.setSeatTypes(x.getSeatType());
