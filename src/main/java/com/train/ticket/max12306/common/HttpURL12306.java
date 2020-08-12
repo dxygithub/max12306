@@ -154,6 +154,10 @@ public class HttpURL12306 {
                             list = settingTicketInfo(ticketStrArray);
                             if (!CollectionUtils.isEmpty(list)) {
                                 LOGGER.info("======> 解析车票信息成功...");
+                                LOGGER.info("======> {} {} - {} 车次总趟数:{}",
+                                        ticketRequest.getFromDate(),
+                                        STATION_MAP.get(ticketRequest.getFromStationCode()),
+                                        STATION_MAP.get(ticketRequest.getToStationCode()),list.size());
                                 return list;
                             }
                         }
