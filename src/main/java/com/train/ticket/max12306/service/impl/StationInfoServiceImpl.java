@@ -29,6 +29,15 @@ public class StationInfoServiceImpl implements StationInfoService {
     private StationInfoMapper stationInfoMapper;
 
     /**
+     * 获取车站总记录数
+     * @return
+     */
+    @Override
+    public Integer getStationCount() {
+        return stationInfoMapper.selectCount(new QueryWrapper<>());
+    }
+
+    /**
      * 保存车站信息
      *
      * @param stationInfos

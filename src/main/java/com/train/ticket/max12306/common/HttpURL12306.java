@@ -157,7 +157,7 @@ public class HttpURL12306 {
                                 LOGGER.info("======> {} {} - {} 车次总趟数:{}",
                                         ticketRequest.getFromDate(),
                                         STATION_MAP.get(ticketRequest.getFromStationCode()),
-                                        STATION_MAP.get(ticketRequest.getToStationCode()),list.size());
+                                        STATION_MAP.get(ticketRequest.getToStationCode()), list.size());
                                 return list;
                             }
                         }
@@ -375,12 +375,13 @@ public class HttpURL12306 {
 
     /**
      * 车站去重
+     *
      * @param keyExtractor
      * @param <T>
      * @return
      */
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Map<Object,Boolean> seen = new ConcurrentHashMap<>();
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 }

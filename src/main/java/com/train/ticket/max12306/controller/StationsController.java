@@ -1,10 +1,12 @@
 package com.train.ticket.max12306.controller;
 
+import com.train.ticket.max12306.common.RestResult;
 import com.train.ticket.max12306.entity.StationInfo;
 import com.train.ticket.max12306.service.StationInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
@@ -26,8 +28,19 @@ public class StationsController {
      * @return
      */
     @GetMapping("/max/getStations")
-    public ResponseEntity getStations(){
+    public RestResult getStations(){
         List<StationInfo> stationInfos=stationInfoService.directGetStationInfo();
-        return ResponseEntity.status(200).body(stationInfos);
+        return RestResult.SUCCESS().data(stationInfos).build();
+    }
+
+    /**
+     * 保存车站信息
+     * @return
+     */
+    @PostMapping("/max/saveStations")
+    public RestResult saveStations(){
+        List<StationInfo> stationInfos=stationInfoService.directGetStationInfo();
+        int result= stationInfoService.stationInfoSave(stationInfos);
+        return RestResult.SUCCESS().message(result>0?"车站信息保存成功":"车站信息保存失败").build();
     }
 }

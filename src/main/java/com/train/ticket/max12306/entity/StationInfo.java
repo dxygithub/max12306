@@ -1,5 +1,7 @@
 package com.train.ticket.max12306.entity;
 
+import cloud.gouyiba.core.annotation.Id;
+import cloud.gouyiba.core.annotation.Table;
 import lombok.Data;
 
 /**
@@ -9,6 +11,7 @@ import lombok.Data;
  * @Version 1.0
  */
 @Data
+@Table("max_station_info")
 public class StationInfo {
 
     /**

@@ -2,6 +2,7 @@ package com.train.ticket.max12306.controller;
 
 import com.train.ticket.max12306.common.HttpURL12306;
 import com.train.ticket.max12306.common.QueryTicketRequest;
+import com.train.ticket.max12306.common.RestResult;
 import com.train.ticket.max12306.entity.TicketInfo;
 import com.train.ticket.max12306.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class TicketController {
     private TicketService ticketService;
 
     @GetMapping("/max/queryTicketInfo")
-    public ResponseEntity queryTicketInfo(QueryTicketRequest ticketRequest){
+    public RestResult queryTicketInfo(QueryTicketRequest ticketRequest){
         Map<String,Object> result=new HashMap<>(16);
         if(Objects.nonNull(ticketRequest)){
             List<TicketInfo> ticketInfos=ticketService.getTickets(ticketRequest);
@@ -42,8 +43,8 @@ public class TicketController {
             }
             result.put("ticketInfos",ticketInfos);
             result.put("fromStations",fromStations);
-            return ResponseEntity.status(200).body(result);
+            return RestResult.SUCCESS().data(result).build();
         }
-        return ResponseEntity.status(400).body("{\"message\":\"参数为空\"}");
+        return RestResult.ERROR_PARAMS().build();
     }
 }

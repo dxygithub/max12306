@@ -1,13 +1,18 @@
 server:
   port: 8081
 
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://139.224.81.29/mybatis_rabbit_plug?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    url: jdbc:mysql://139.224.81.29/max12306?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
     username: root
     password: Duxiaoyu@123
 
 mybatis-max:
   mapper-locations: classpath:/mapper/*Mapper.xml
   banner: true
+
+logging:
+  level:
+    com.train.ticket.max12306.mapper: debug

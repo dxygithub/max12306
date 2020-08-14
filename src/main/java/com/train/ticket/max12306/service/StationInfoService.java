@@ -30,4 +30,10 @@ public interface StationInfoService {
      * @return
      */
     List<StationInfo> directGetStationInfo();
+
+    /**
+     * 获取车站总记录数
+     * @return
+     */
+    Integer getStationCount();
 }
