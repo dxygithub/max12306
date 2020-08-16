@@ -1,7 +1,9 @@
 package com.train.ticket.max12306.service;
 
+import com.train.ticket.max12306.common.QueryTicketPriceRequest;
 import com.train.ticket.max12306.common.QueryTicketRequest;
 import com.train.ticket.max12306.entity.TicketInfo;
+import com.train.ticket.max12306.entity.TicketPrice;
 
 import java.util.List;
 
@@ -14,4 +16,6 @@ import java.util.List;
 public interface TicketService {
 
     List<TicketInfo> getTickets(QueryTicketRequest ticketRequest);
+
+    TicketPrice getTicketPrice(QueryTicketPriceRequest ticketPriceRequest);
 }

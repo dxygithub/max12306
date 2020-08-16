@@ -46,6 +46,12 @@ public interface HttpURLConstant12306 {
     String CHECK_CAPTCHA="https://kyfw.12306.cn/passport/captcha/captcha-check?callback=jQuery19105718945282709293_1595988456279&answer={xyz}&rand=sjrand&login_site=E&_=1595988456290";
 
     /**
+     * 2020-08-16 测试结果：识别失败
+     * 图片验证码自动校验: post(img: img-baseCode64)
+     */
+    String OCR_AUTO_CHECK="https://12306-ocr.pjialin.com/check/?img={img}";
+
+    /**
      * 登录请求: post 参数->{“username:用户名”:“xxx”, “password:密码”:“xxx”, “appid”:“otn”, “answer:图形验证码坐标”:“xxx”}
      */
     String LOGIN_URL="https://kyfw.12306.cn/passport/web/login";

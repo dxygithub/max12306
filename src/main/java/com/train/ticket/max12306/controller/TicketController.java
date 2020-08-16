@@ -1,9 +1,11 @@
 package com.train.ticket.max12306.controller;
 
 import com.train.ticket.max12306.common.HttpURL12306;
+import com.train.ticket.max12306.common.QueryTicketPriceRequest;
 import com.train.ticket.max12306.common.QueryTicketRequest;
 import com.train.ticket.max12306.common.RestResult;
 import com.train.ticket.max12306.entity.TicketInfo;
+import com.train.ticket.max12306.entity.TicketPrice;
 import com.train.ticket.max12306.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -46,5 +48,11 @@ public class TicketController {
             return RestResult.SUCCESS().data(result).build();
         }
         return RestResult.ERROR_PARAMS().build();
+    }
+
+    @GetMapping("/max/queryTicketPrice")
+    public RestResult queryTicketPrice(QueryTicketPriceRequest ticketPriceRequest){
+        TicketPrice ticketPrice=ticketService.getTicketPrice(ticketPriceRequest);
+        return RestResult.SUCCESS().data(ticketPrice).build();
     }
 }

@@ -220,6 +220,68 @@ public class HttpURL12306 {
         return null;
     }
 
+
+    /**
+     * 获取登录图片验证码
+     *
+     * @return
+     */
+    public static String getImgCaptcha() throws Exception {
+        try (CloseableHttpClient httpClient = httpClientBuild()) {
+            HttpGet httpGet = httpGetBuild(HttpURLConstant12306.GET_CAPTCHA.replace("{1}", String.valueOf(System.currentTimeMillis())));
+            try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
+                HttpEntity entity = httpResponse.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    // 验证码json
+                    String jsonResult = StringUtils.substringBetween(result, "(", ")");
+                    // 验证码回调函数
+                    String jqueryCallBack=StringUtils.substringBetween(result, "/**/", "(");
+                    JSONObject json = JSONUtil.parseObj(jsonResult);
+                    if (json.get("result_code", String.class).equals("0")) {
+                        String img = json.get("image", String.class);
+                        LOGGER.info("======> 图片验证码获取成功...");
+                        return jqueryCallBack+"--"+img;
+                    } else {
+                        LOGGER.info("======> 图片验证码获取失败...");
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+
+    /**
+     * 图片验证码校验
+     * @param answer
+     * @return
+     */
+    public static String checkImgCapthcha(String answer) throws Exception{
+        try (CloseableHttpClient httpClient = httpClientBuild()) {
+            HttpGet httpGet = httpGetBuild(HttpURLConstant12306.CHECK_CAPTCHA.replace("{xyz}", answer));
+            try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
+                HttpEntity entity = httpResponse.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if (json.get("result_code", String.class).equals("4")) {
+                        String resultCode="4";
+                        LOGGER.info("======> 图片验证码校验成功...");
+                        return resultCode;
+                    } else {
+                        LOGGER.info("======> 图片验证码校验失败...");
+                    }
+                }
+            }
+        }
+        return "5";
+    }
+
     /**
      * 设置车票信息
      *
@@ -371,6 +433,26 @@ public class HttpURL12306 {
         context = HttpClientContext.create();
         context.setCookieStore(cookieStore);
         return HttpClients.custom().setSSLSocketFactory(sslSf).setDefaultRequestConfig(globalConfig).setDefaultCookieStore(cookieStore).build();
+    }
+
+    /**
+     * 创建HttpGet
+     *
+     * @param url
+     * @return
+     */
+    public static HttpGet httpGetBuild(String url) {
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+        httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+        httpGet.addHeader(HttpHeaderParamter.COOKIE.getKey(), HttpHeaderParamter.COOKIE.getValue().
+                replace("{1}", JSESSIONID).
+                replace("{2}", RAIL_EXPIRATION).
+                replace("{3}", RAIL_DEVICEID));
+        return httpGet;
     }
 
     /**
