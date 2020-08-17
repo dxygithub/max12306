@@ -47,16 +47,33 @@ public class HttpURL12306 {
 
     private static final int SUCCESS = 200;
 
-    private static final String JSESSIONID = "687E4871E1E191B0AFEA96C25ED69639";
+    /**
+     * 2020-08-17 更新 12306 cookie新增参数: 后期可能会变
+     */
+    private static final String _PASSPORT_SESSION = "b2c081f950984b14b0db884e135a6c615175";
 
-    private static final String RAIL_EXPIRATION = "1596163502806";
+    private static final String _PASSPORT_CT = "4c488eeb9640470cb2eb21281a515caet4907";
 
-    private static final String RAIL_DEVICEID = "nBVP2rmFnuqc8JeR6Pu4GHIBLxXaGlDg2jP2mTLakZJ-otNv4aV-albpv3H-uFZznksWqnbPgliWn_Cu6sSdm1qOtaPoUi3VCMHaSDqb8nS-ZkDBmwwPiT4jOt9LlMQC-NvnjzHymbsq2cKKqt4nyhqp-2Ac9M5h";
+
+    // ip坐标参数: 目前暂时不知何处用到
+    private static final String BIGIPSERVERPASSPORT = "887619850.50215.0000";
+
+    // 不变参数：请求始终携带
+    private static final String RAIL_EXPIRATION = "1597430514268";
+
+    // 不变参数：请求始终携带
+    private static final String RAIL_DEVICEID = "b7a3X7CAEbscXSYgba30A0yi9tj5RexGE5WlLxUqrURlzpBfGvCFEfNftUNqQO8Mj77oKo9vvuGsUq8rOgTQJKCMltTBij0YxkdmbiBfN3GrxiBB3cgRyZh8GhEbM7IQRafhuG-WD-BdAzwtAFgn3U5DRu3NX_rw";
 
     /**
-     * 车站Map
+     * 车站信息Map
      */
     public static final Map<String, String> STATION_MAP = new HashMap<>();
+
+    /**
+     * 图片验证码Map
+     * 缓存已获取的验证码
+     */
+    public static final Map<String, String> IMG_CAPTHCHA_MAP = new HashMap<>();
 
     /**
      * 本地cookie实例
@@ -121,20 +138,11 @@ public class HttpURL12306 {
     public static List<TicketInfo> parseTicketInfo(QueryTicketRequest ticketRequest) throws Exception {
         if (Objects.nonNull(ticketRequest)) {
             try (CloseableHttpClient httpClient = httpClientBuild()) {
-                HttpGet httpGet = new HttpGet(HttpURLConstant12306.TICKET_QUERY_URL.
+                HttpGet httpGet = httpGetBuild(HttpURLConstant12306.TICKET_QUERY_URL.
                         replace("{1}", ticketRequest.getFromDate()).
                         replace("{2}", ticketRequest.getFromStationCode()).
                         replace("{3}", ticketRequest.getToStationCode()).
                         replace("{4}", ticketRequest.getTicketType().getValue()));
-                httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
-                httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
-                httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
-                httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
-                httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
-                httpGet.addHeader(HttpHeaderParamter.COOKIE.getKey(), HttpHeaderParamter.COOKIE.getValue().
-                        replace("{1}", JSESSIONID).
-                        replace("{2}", RAIL_EXPIRATION).
-                        replace("{3}", RAIL_DEVICEID));
                 try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
                     HttpEntity httpEntity = httpResponse.getEntity();
                     String result = EntityUtils.toString(httpEntity);
@@ -179,21 +187,12 @@ public class HttpURL12306 {
     public static TicketPrice parseTicketPrice(QueryTicketPriceRequest ticketPriceRequest) throws Exception {
         if (Objects.nonNull(ticketPriceRequest)) {
             try (CloseableHttpClient httpClient = httpClientBuild()) {
-                HttpGet httpGet = new HttpGet(HttpURLConstant12306.TICKET_PRICE_QUERY_URL.
+                HttpGet httpGet = httpGetBuild(HttpURLConstant12306.TICKET_PRICE_QUERY_URL.
                         replace("{1}", ticketPriceRequest.getTrainNo()).
                         replace("{2}", ticketPriceRequest.getFromStationNo()).
                         replace("{3}", ticketPriceRequest.getToStationNo()).
                         replace("{4}", ticketPriceRequest.getSeatTypes()).
                         replace("{5}", ticketPriceRequest.getTrainDate()));
-                httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
-                httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
-                httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
-                httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
-                httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
-                httpGet.addHeader(HttpHeaderParamter.COOKIE.getKey(), HttpHeaderParamter.COOKIE.getValue().
-                        replace("{1}", JSESSIONID).
-                        replace("{2}", RAIL_EXPIRATION).
-                        replace("{3}", RAIL_DEVICEID));
                 try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
                     HttpEntity httpEntity = httpResponse.getEntity();
                     String result = EntityUtils.toString(httpEntity);
@@ -228,8 +227,12 @@ public class HttpURL12306 {
      */
     public static String getImgCaptcha() throws Exception {
         try (CloseableHttpClient httpClient = httpClientBuild()) {
-            HttpGet httpGet = httpGetBuild(HttpURLConstant12306.GET_CAPTCHA.replace("{1}", String.valueOf(System.currentTimeMillis())));
-            try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
+            String currentMills = String.valueOf(System.currentTimeMillis());
+            HttpGet httpGet = httpGetBuild(HttpURLConstant12306.GET_CAPTCHA.
+                    replace("{1}", currentMills).
+                    replace("{2}", currentMills).
+                    replace("{3}", currentMills));
+            try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet, context)) {
                 HttpEntity entity = httpResponse.getEntity();
                 String result = EntityUtils.toString(entity);
                 // 释放资源
@@ -238,12 +241,17 @@ public class HttpURL12306 {
                     // 验证码json
                     String jsonResult = StringUtils.substringBetween(result, "(", ")");
                     // 验证码回调函数
-                    String jqueryCallBack=StringUtils.substringBetween(result, "/**/", "(");
+                    String jqueryCallBack = StringUtils.substringBetween(result, "/**/", "(");
                     JSONObject json = JSONUtil.parseObj(jsonResult);
                     if (json.get("result_code", String.class).equals("0")) {
                         String img = json.get("image", String.class);
+                        IMG_CAPTHCHA_MAP.put(currentMills, img);
                         LOGGER.info("======> 图片验证码获取成功...");
-                        return jqueryCallBack+"--"+img;
+                        /*List<Cookie> cookies=cookieStore.getCookies();
+                        cookies.forEach(x->{
+                            LOGGER.info("{}:{}",x.getName(),x.getValue());
+                        });*/
+                        return jqueryCallBack + "--" + img;
                     } else {
                         LOGGER.info("======> 图片验证码获取失败...");
                     }
@@ -256,21 +264,24 @@ public class HttpURL12306 {
 
     /**
      * 图片验证码校验
+     *
      * @param answer
      * @return
      */
-    public static String checkImgCapthcha(String answer) throws Exception{
+    public static String checkImgCapthcha(String answer, String timer) throws Exception {
         try (CloseableHttpClient httpClient = httpClientBuild()) {
-            HttpGet httpGet = httpGetBuild(HttpURLConstant12306.CHECK_CAPTCHA.replace("{xyz}", answer));
+            HttpGet httpGet = httpGetBuild(HttpURLConstant12306.CHECK_CAPTCHA.
+                    replace("{xyz}", answer).replace("{1}", timer).replace("{2}", timer));
             try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
                 HttpEntity entity = httpResponse.getEntity();
                 String result = EntityUtils.toString(entity);
                 // 释放资源
                 EntityUtils.consume(entity);
                 if (StringUtils.isNotBlank(result)) {
-                    JSONObject json = JSONUtil.parseObj(result);
+                    String jsonResult = StringUtils.substringBetween(result, "(", ")");
+                    JSONObject json = JSONUtil.parseObj(jsonResult);
                     if (json.get("result_code", String.class).equals("4")) {
-                        String resultCode="4";
+                        String resultCode = "4";
                         LOGGER.info("======> 图片验证码校验成功...");
                         return resultCode;
                     } else {
@@ -281,6 +292,7 @@ public class HttpURL12306 {
         }
         return "5";
     }
+
 
     /**
      * 设置车票信息
@@ -423,7 +435,7 @@ public class HttpURL12306 {
      * @throws NoSuchAlgorithmException
      * @throws KeyManagementException
      */
-    private static CloseableHttpClient httpClientBuild() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
+    public static CloseableHttpClient httpClientBuild() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException {
         // 创建SSL安全认证
         SSLContext sslcontext = SSLContexts.custom().loadTrustMaterial(null, (chain, authType) -> true).build();
         SSLConnectionSocketFactory sslSf = new SSLConnectionSocketFactory(sslcontext, null, null, new NoopHostnameVerifier());
@@ -449,9 +461,10 @@ public class HttpURL12306 {
         httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
         httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
         httpGet.addHeader(HttpHeaderParamter.COOKIE.getKey(), HttpHeaderParamter.COOKIE.getValue().
-                replace("{1}", JSESSIONID).
+                replace("{1}", _PASSPORT_SESSION).
                 replace("{2}", RAIL_EXPIRATION).
-                replace("{3}", RAIL_DEVICEID));
+                replace("{3}", RAIL_DEVICEID).
+                replace("{4}", _PASSPORT_CT));
         return httpGet;
     }
 

@@ -1,8 +1,10 @@
 package com.train.ticket.max12306.controller;
 
+import com.train.ticket.max12306.common.HttpURL12306;
 import com.train.ticket.max12306.common.RestResult;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +20,9 @@ public class UserLoginController {
 
     @Autowired
     private UserLoginService userLoginService;
+
+    @Value("${autoCheck}")
+    private boolean autoCheck;
 
     /**
      * 获取图片验证码
@@ -36,7 +41,11 @@ public class UserLoginController {
      * @return
      */
     @GetMapping("/max/checkImgCapthcha")
-    public RestResult checkImgCapthcha(String imgIndex) {
-        return userLoginService.checkImgCaptcha(imgIndex, false);
+    public RestResult checkImgCapthcha(String imgIndex,String timer) {
+        if(this.autoCheck){
+            return userLoginService.checkImgCaptcha(imgIndex,timer, HttpURL12306.IMG_CAPTHCHA_MAP.get(timer),this.autoCheck);
+        }else {
+            return userLoginService.checkImgCaptcha(imgIndex,timer, "",this.autoCheck);
+        }
     }
 }

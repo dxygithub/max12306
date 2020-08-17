@@ -26,7 +26,7 @@ public enum HttpHeaderParamter {
      * 2020-07-28
      * 目前12306查询余票也必须携带cookie
      */
-    COOKIE("Cookie","JSESSIONID={1};RAIL_EXPIRATION={2};RAIL_DEVICEID={3};");
+    COOKIE("Cookie","_passport_session={1};RAIL_EXPIRATION={2};RAIL_DEVICEID={3};_passport_ct={4};");
 
     private String value;
 

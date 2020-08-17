@@ -28,6 +28,11 @@ public class TicketController {
     @Autowired
     private TicketService ticketService;
 
+    /**
+     * 查询车票信息
+     * @param ticketRequest
+     * @return
+     */
     @GetMapping("/max/queryTicketInfo")
     public RestResult queryTicketInfo(QueryTicketRequest ticketRequest){
         Map<String,Object> result=new HashMap<>(16);
@@ -50,6 +55,11 @@ public class TicketController {
         return RestResult.ERROR_PARAMS().build();
     }
 
+    /**
+     * 查询车票价格
+     * @param ticketPriceRequest
+     * @return
+     */
     @GetMapping("/max/queryTicketPrice")
     public RestResult queryTicketPrice(QueryTicketPriceRequest ticketPriceRequest){
         TicketPrice ticketPrice=ticketService.getTicketPrice(ticketPriceRequest);

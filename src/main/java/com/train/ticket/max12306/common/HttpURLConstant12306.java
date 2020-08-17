@@ -36,14 +36,14 @@ public interface HttpURLConstant12306 {
     String TICKET_PRICE_QUERY_URL="https://kyfw.12306.cn/otn/leftTicket/queryTicketPrice?train_no={1}&from_station_no={2}&to_station_no={3}&seat_types={4}&train_date={5}";
 
     /**
-     * 获取登录验证码: get(当前时间毫秒数:{1})
+     * 获取登录验证码: get(当前时间毫秒数:{1},{2},{3})
      */
-    String GET_CAPTCHA="https://kyfw.12306.cn/passport/captcha/captcha-image64?login_site=E&module=login&rand=sjrand&{1}&callback=jQuery19105718945282709293_1595988456279&_=1595988456286";
+    String GET_CAPTCHA="https://kyfw.12306.cn/passport/captcha/captcha-image64?login_site=E&module=login&rand=sjrand&{1}&callback=jQuery191013540634449692446_{2}&_={3}";
 
     /**
-     * 校验验证码: get(验证码坐标:{xyz})
+     * 校验验证码: get(验证码坐标:{xyz},{1}{2}:回调函数毫秒数)
      */
-    String CHECK_CAPTCHA="https://kyfw.12306.cn/passport/captcha/captcha-check?callback=jQuery19105718945282709293_1595988456279&answer={xyz}&rand=sjrand&login_site=E&_=1595988456290";
+    String CHECK_CAPTCHA="https://kyfw.12306.cn/passport/captcha/captcha-check?callback=jQuery191013540634449692446_{1}&answer={xyz}&rand=sjrand&login_site=E&_={2}";
 
     /**
      * 2020-08-16 测试结果：识别失败

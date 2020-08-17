@@ -30,6 +30,7 @@ public class StationsController {
     @GetMapping("/max/getStations")
     public RestResult getStations(){
         List<StationInfo> stationInfos=stationInfoService.directGetStationInfo();
+        //List<StationInfo> stationInfos=stationInfoService.getAllStationInfo();
         return RestResult.SUCCESS().data(stationInfos).build();
     }
 

@@ -13,15 +13,17 @@ public interface UserLoginService {
 
     /**
      * 获取图片验证码
+     *
      * @return
      */
     RestResult getImgCaptcha();
 
     /**
      * 图片验证码校验
+     *
      * @param answer
      * @param autoCheck
      * @return
      */
-    RestResult checkImgCaptcha(String answer,boolean autoCheck);
+    RestResult checkImgCaptcha(String answer, String timer, String img, boolean autoCheck);
 }
