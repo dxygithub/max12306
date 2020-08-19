@@ -1,11 +1,14 @@
 package com.train.ticket.max12306.controller;
 
 import com.train.ticket.max12306.common.HttpURL12306;
+import com.train.ticket.max12306.common.InitSlidePassPort;
 import com.train.ticket.max12306.common.RestResult;
+import com.train.ticket.max12306.common.UserLoginRequest;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -35,17 +38,48 @@ public class UserLoginController {
     }
 
     /**
+     * 初始化滑块验证
+     *
+     * @param passPort
+     * @return
+     */
+    @PostMapping("/max/initSlidePassport")
+    public RestResult initSlidePassport(InitSlidePassPort passPort) {
+        return userLoginService.initSlidePassport(passPort);
+    }
+
+    /**
+     * 用户登录
+     * @param loginRequest
+     * @return
+     */
+    @PostMapping("/max/userLogin")
+    public RestResult userLogin(UserLoginRequest loginRequest){
+        return userLoginService.userLogin(loginRequest);
+    }
+
+    /**
+     * 用户认证
+     * @param appId
+     * @return
+     */
+    @PostMapping("/max/passPortUamtk")
+    public RestResult passPortUamtk(String appId){
+        return userLoginService.userPassportUamtk(appId);
+    }
+
+    /**
      * 校验图片验证码
      *
      * @param imgIndex
      * @return
      */
     @GetMapping("/max/checkImgCapthcha")
-    public RestResult checkImgCapthcha(String imgIndex,String timer) {
-        if(this.autoCheck){
-            return userLoginService.checkImgCaptcha(imgIndex,timer, HttpURL12306.IMG_CAPTHCHA_MAP.get(timer),this.autoCheck);
-        }else {
-            return userLoginService.checkImgCaptcha(imgIndex,timer, "",this.autoCheck);
+    public RestResult checkImgCapthcha(String imgIndex, String timer) {
+        if (this.autoCheck) {
+            return userLoginService.checkImgCaptcha(imgIndex, timer, HttpURL12306.IMG_CAPTHCHA_MAP.get(timer), this.autoCheck);
+        } else {
+            return userLoginService.checkImgCaptcha(imgIndex, timer, "", this.autoCheck);
         }
     }
 }

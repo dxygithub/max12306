@@ -9,17 +9,21 @@ import com.train.ticket.max12306.entity.TicketPrice;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -48,21 +52,36 @@ public class HttpURL12306 {
     private static final int SUCCESS = 200;
 
     /**
-     * 2020-08-17 更新 12306 cookie新增参数: 后期可能会变
+     * 2020-08-17 更新
+     * 12306 cookie新增参数: 后期可能会变
+     * 参数会过期
      */
-    private static final String _PASSPORT_SESSION = "b2c081f950984b14b0db884e135a6c615175";
+    private static final String _PASSPORT_SESSION = "1a2a4644ab7f4792850dd648fef2cd771208";
 
-    private static final String _PASSPORT_CT = "4c488eeb9640470cb2eb21281a515caet4907";
+    private static final String _PASSPORT_CT = "a45a68ebb36f4bbea3cb35f8d196f269t0491";
 
 
     // ip坐标参数: 目前暂时不知何处用到
     private static final String BIGIPSERVERPASSPORT = "887619850.50215.0000";
 
-    // 不变参数：请求始终携带
-    private static final String RAIL_EXPIRATION = "1597430514268";
+    private static final String BIGIPSERVERPOOLPASSPORT ="267190794.50215.0000";
 
-    // 不变参数：请求始终携带
-    private static final String RAIL_DEVICEID = "b7a3X7CAEbscXSYgba30A0yi9tj5RexGE5WlLxUqrURlzpBfGvCFEfNftUNqQO8Mj77oKo9vvuGsUq8rOgTQJKCMltTBij0YxkdmbiBfN3GrxiBB3cgRyZh8GhEbM7IQRafhuG-WD-BdAzwtAFgn3U5DRu3NX_rw";
+    private static final String BIGIPSERVEROTN="4007067914.50210.0000";
+
+    private static final String ROUTE="9036359bb8a8a461c164a04f8f50b252";
+    // ip坐标参数: 目前暂时不知何处用到
+
+    /**
+     * 不变参数：请求始终携带
+     * 注意，该参数会过期，后期动态获取
+     */
+    private static final String RAIL_EXPIRATION = "1597926519753";
+
+    /**
+     * 不变参数：请求始终携带
+     * 注意，该参数会过期，后期动态获取
+     */
+    private static final String RAIL_DEVICEID = "GOm7ru_4MERiHCOyLWUkAlyDmWVsj7e0s5AbPGgwv-n-AMgRpmm7ibflyrkFCVcgzqHHGCiuRPnZjnoL9UrzZjf8FgM6wBbzeqadV-YTdqdyrxp3it3h5HtMBNr-sny4jDwiQAPbKgdA7NN_odTC4AoIvfQSEhX5";
 
     /**
      * 车站信息Map
@@ -293,6 +312,109 @@ public class HttpURL12306 {
         return "5";
     }
 
+    /**
+     * 初始化滑块验证
+     *
+     * @param passPort
+     * @return
+     * @throws Exception
+     */
+    public static String initSlidePassPort(InitSlidePassPort passPort) throws Exception {
+        try (CloseableHttpClient client = httpClientBuild()) {
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("appid", passPort.getAppid()));
+            formPail.add(new BasicNameValuePair("username", passPort.getUsername()));
+            formPail.add(new BasicNameValuePair("slideMode", passPort.getSlideMode()));
+            HttpPost post = httpPostBuild(HttpURLConstant12306.INIT_SLIDE_PASSPORT_URL,formPail);
+            try (CloseableHttpResponse response = client.execute(post)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if (json.get("result_code", String.class).equals("0")) {
+                        String ifCheckSlidePasscodeToken = json.get("if_check_slide_passcode_token", String.class);
+                        return ifCheckSlidePasscodeToken;
+                    }
+                }
+            }
+        }
+        return "5";
+    }
+
+    /**
+     * 请求登录
+     *
+     * @param loginRequest
+     * @return
+     */
+    public static String loginRequest(UserLoginRequest loginRequest) throws Exception {
+        try (CloseableHttpClient client = httpClientBuild()) {
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("sessionId", loginRequest.getSessionId()));
+            formPail.add(new BasicNameValuePair("sig", loginRequest.getSig()));
+            formPail.add(new BasicNameValuePair("if_check_slide_passcode_token", loginRequest.getIfCheckSlidePasscodeToken()));
+            formPail.add(new BasicNameValuePair("scene", loginRequest.getScene()));
+            formPail.add(new BasicNameValuePair("tk", loginRequest.getTk()));
+            formPail.add(new BasicNameValuePair("username", loginRequest.getUsername()));
+            formPail.add(new BasicNameValuePair("password", loginRequest.getPassword()));
+            formPail.add(new BasicNameValuePair("appid", loginRequest.getAppid()));
+            HttpPost post = httpPostBuild(HttpURLConstant12306.LOGIN_URL, formPail);
+            try (CloseableHttpResponse response = client.execute(post)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if ("0".equals(json.get("result_code", String.class))) {
+                        String uamtk=json.get("uamtk",String.class);
+                        LOGGER.info("======> username: {}->登录成功...", loginRequest.getUsername());
+                        return uamtk;
+                    } else {
+                        LOGGER.info("======> username: {}->登录失败...", loginRequest.getUsername());
+                        return "5";
+                    }
+                }
+            }
+        }
+        return "5";
+    }
+
+    /**
+     * 登录成功认证回调
+     * @param appId
+     * @return
+     */
+    public static String loginSuccessPassportUamtk(String appId) throws Exception{
+        try (CloseableHttpClient client=httpClientBuild()){
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("appid",appId));
+            HttpPost post=httpPostBuild(HttpURLConstant12306.PASSPORT_UAMTK_URL,formPail);
+            try (CloseableHttpResponse response=client.execute(post)){
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if(StringUtils.isNotBlank(result)){
+                    JSONObject json=JSONUtil.parseObj(result);
+                    if("0".equals(json.get("result_code",String.class))){
+                        String apptk=json.get("newapptk",String.class);
+                        if(StringUtils.isBlank(apptk)){
+                            apptk=json.get("apptk",String.class);
+                        }
+                        LOGGER.info("======> 认证成功...");
+                        return apptk;
+                    }else {
+                        LOGGER.info("======> 认证失败...");
+                    }
+                }
+            }
+        }
+        return "";
+    }
+
 
     /**
      * 设置车票信息
@@ -448,7 +570,7 @@ public class HttpURL12306 {
     }
 
     /**
-     * 创建HttpGet
+     * 创建get请求
      *
      * @param url
      * @return
@@ -466,6 +588,33 @@ public class HttpURL12306 {
                 replace("{3}", RAIL_DEVICEID).
                 replace("{4}", _PASSPORT_CT));
         return httpGet;
+    }
+
+    /**
+     * 创建post请求
+     *
+     * @param url
+     * @return
+     */
+    public static HttpPost httpPostBuild(String url, List<NameValuePair> formPail) throws Exception {
+        HttpPost httpPost = new HttpPost(url);
+        httpPost.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+        httpPost.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+        httpPost.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+        httpPost.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+        httpPost.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+        httpPost.addHeader(HttpHeaderParamter.COOKIE.getKey(), HttpHeaderParamter.COOKIE.getValue().
+                replace("{1}", _PASSPORT_SESSION).
+                replace("{2}", RAIL_EXPIRATION).
+                replace("{3}", RAIL_DEVICEID).
+                replace("{4}", _PASSPORT_CT).
+                replace("{5}",BIGIPSERVERPASSPORT).
+                replace("{6}",BIGIPSERVERPOOLPASSPORT).
+                replace("{7}",BIGIPSERVEROTN).
+                replace("{8}",ROUTE));
+        UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(formPail, "UTF-8");
+        httpPost.setEntity(formEntity);
+        return httpPost;
     }
 
     /**

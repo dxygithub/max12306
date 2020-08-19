@@ -3,7 +3,9 @@ package com.train.ticket.max12306.service.impl;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.common.HttpURL12306;
+import com.train.ticket.max12306.common.InitSlidePassPort;
 import com.train.ticket.max12306.common.RestResult;
+import com.train.ticket.max12306.common.UserLoginRequest;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 
 /**
@@ -34,7 +37,9 @@ public class UserLoginServiceImpl implements UserLoginService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoginServiceImpl.class);
 
-    /** 验证码中心位置坐标 **/
+    /**
+     * 验证码中心位置坐标
+     **/
     private String yzm1Point = "35,72";
     private String yzm2Point = "111,72";
     private String yzm3Point = "181,72";
@@ -63,6 +68,30 @@ public class UserLoginServiceImpl implements UserLoginService {
     }
 
     /**
+     * 初始化滑块验证
+     *
+     * @param passPort
+     * @return
+     */
+    @Override
+    public RestResult initSlidePassport(InitSlidePassPort passPort) {
+        if (Objects.nonNull(passPort)) {
+            try {
+                String ifCheckSlidePasscodeToken = HttpURL12306.initSlidePassPort(passPort);
+                if (StringUtils.equals("5", ifCheckSlidePasscodeToken)) {
+                    LOGGER.info("======> 初始化滑块验证失败...");
+                    return RestResult.SERVER_ERROR().message("初始化滑块验证失败").build();
+                }
+                LOGGER.info("======> 初始化滑块验证成功...");
+                return RestResult.SUCCESS().data(ifCheckSlidePasscodeToken).build();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return RestResult.ERROR_PARAMS().message("初始化参数为空").build();
+    }
+
+    /**
      * 图片验证码校验
      *
      * @param imgIndex
@@ -80,9 +109,9 @@ public class UserLoginServiceImpl implements UserLoginService {
                     return RestResult.ERROR_PARAMS().message("验证码坐标为空").build();
                 }
                 LOGGER.info("======> 开始手动识别验证码...");
-                String[] imgIndexArr = imgIndex.split(",");
-                String answer = capthchaXYMatching(imgIndexArr);
-                resultCode = HttpURL12306.checkImgCapthcha(answer, timer);
+                /*String[] imgIndexArr = imgIndex.split(",");
+                String answer = capthchaXYMatching(imgIndexArr);*/
+                resultCode = HttpURL12306.checkImgCapthcha(imgIndex, timer);
             } else {
                 LOGGER.info("======> 开始自动识别验证码...");
                 // 自动验证
@@ -117,6 +146,51 @@ public class UserLoginServiceImpl implements UserLoginService {
             e.printStackTrace();
         }
         return RestResult.ERROR_PARAMS().message("验证码校验异常").build();
+    }
+
+    /**
+     * 用户登录
+     *
+     * @param loginRequest
+     * @return
+     */
+    @Override
+    public RestResult userLogin(UserLoginRequest loginRequest) {
+        if (Objects.nonNull(loginRequest)) {
+            try {
+                String result = HttpURL12306.loginRequest(loginRequest);
+                if (!StringUtils.equals(result, "5")) {
+                    return RestResult.SUCCESS().message("登录成功").data(result).build();
+                } else {
+                    return RestResult.SUCCESS().message("登录失败").data(result).build();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return RestResult.ERROR_PARAMS().message("登录参数为空").build();
+    }
+
+    /**
+     * 用户认证
+     *
+     * @param appId
+     * @return
+     */
+    @Override
+    public RestResult userPassportUamtk(String appId) {
+        if (StringUtils.isNotBlank(appId)) {
+            try {
+                String result = HttpURL12306.loginSuccessPassportUamtk(appId);
+                if (StringUtils.isBlank(result)) {
+                    return RestResult.SUCCESS().message("认证失败").data("5").build();
+                }
+                return RestResult.SUCCESS().message("认证成功").data(result).build();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return RestResult.ERROR_PARAMS().message("认证参数为空").build();
     }
 
     /**

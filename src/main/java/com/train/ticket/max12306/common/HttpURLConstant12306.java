@@ -46,15 +46,24 @@ public interface HttpURLConstant12306 {
     String CHECK_CAPTCHA="https://kyfw.12306.cn/passport/captcha/captcha-check?callback=jQuery191013540634449692446_{1}&answer={xyz}&rand=sjrand&login_site=E&_={2}";
 
     /**
-     * 2020-08-16 测试结果：识别失败
-     * 图片验证码自动校验: post(img: img-baseCode64)
+     * 图片验证码OCR校验: post(img: img-baseCode64)
      */
-    String OCR_AUTO_CHECK="https://12306-ocr.pjialin.com/check/?img={img}";
+    String OCR_AUTO_CHECK="https://12306-ocr.pjialin.com/check/";
+
+    /**
+     * 初始化滑块验证: post(appid/username/slideMode)
+     */
+    String INIT_SLIDE_PASSPORT_URL="https://kyfw.12306.cn/passport/web/slide-passcode";
 
     /**
      * 登录请求: post 参数->{“username:用户名”:“xxx”, “password:密码”:“xxx”, “appid”:“otn”, “answer:图形验证码坐标”:“xxx”}
      */
     String LOGIN_URL="https://kyfw.12306.cn/passport/web/login";
+
+    /**
+     * 用户认证: post(appid)
+     */
+    String PASSPORT_UAMTK_URL="https://kyfw.12306.cn/passport/web/auth/uamtk";
 
     /**
      * 获取RAIL_EXPIRATION和RAIL_DEVICEID参数：get(algID:{1}、hashCode:{2}、timestamp:{3}当前时间毫秒数)

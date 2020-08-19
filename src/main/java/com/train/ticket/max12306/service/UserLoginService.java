@@ -1,6 +1,8 @@
 package com.train.ticket.max12306.service;
 
+import com.train.ticket.max12306.common.InitSlidePassPort;
 import com.train.ticket.max12306.common.RestResult;
+import com.train.ticket.max12306.common.UserLoginRequest;
 
 /**
  * @ClassName UserLogin
@@ -26,4 +28,26 @@ public interface UserLoginService {
      * @return
      */
     RestResult checkImgCaptcha(String answer, String timer, String img, boolean autoCheck);
+
+
+    /**
+     * 初始化滑块验证
+     * @param passPort
+     * @return
+     */
+    RestResult initSlidePassport(InitSlidePassPort passPort);
+
+    /**
+     * 用户登录
+     * @param loginRequest
+     * @return
+     */
+    RestResult userLogin(UserLoginRequest loginRequest);
+
+    /**
+     * 用户认证
+     * @param appId
+     * @return
+     */
+    RestResult userPassportUamtk(String appId);
 }
