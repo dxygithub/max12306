@@ -2,10 +2,7 @@ package com.train.ticket.max12306.service.impl;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.train.ticket.max12306.common.HttpURL12306;
-import com.train.ticket.max12306.common.InitSlidePassPort;
-import com.train.ticket.max12306.common.RestResult;
-import com.train.ticket.max12306.common.UserLoginRequest;
+import com.train.ticket.max12306.common.*;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -38,7 +35,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoginServiceImpl.class);
 
     /**
-     * 验证码中心位置坐标
+     * 验证码中心位置固定坐标
      **/
     private String yzm1Point = "35,72";
     private String yzm2Point = "111,72";
@@ -48,7 +45,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     private String yzm6Point = "111,148";
     private String yzm7Point = "181,148";
     private String yzm8Point = "250,148";
-    /** 验证码中心位置坐标 **/
+
 
     /**
      * 获取图片验证码
@@ -109,14 +106,12 @@ public class UserLoginServiceImpl implements UserLoginService {
                     return RestResult.ERROR_PARAMS().message("验证码坐标为空").build();
                 }
                 LOGGER.info("======> 开始手动识别验证码...");
-                /*String[] imgIndexArr = imgIndex.split(",");
-                String answer = capthchaXYMatching(imgIndexArr);*/
+                // 手动识别验证码，坐标位置前端已经处理过，此处直接进行校验即可
                 resultCode = HttpURL12306.checkImgCapthcha(imgIndex, timer);
             } else {
                 LOGGER.info("======> 开始自动识别验证码...");
-                // 自动验证
                 try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
-                    HttpPost httpPost = new HttpPost("https://12306-ocr.pjialin.com/check/");
+                    HttpPost httpPost = new HttpPost(HttpURLConstant12306.OCR_AUTO_CHECK);
                     List<NameValuePair> formPail = new ArrayList<>();
                     formPail.add(new BasicNameValuePair("img", img));
                     UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(formPail, "UTF-8");
@@ -129,6 +124,7 @@ public class UserLoginServiceImpl implements UserLoginService {
                         if (StringUtils.isNotBlank(result)) {
                             JSONObject json = JSONUtil.parseObj(result);
                             if ("200".equals(json.get("code", String.class))) {
+                                // 自动验证，返回验证码下标位置，需要使用固定坐标位置进行转换
                                 String[] autoCheckImgIndex = json.get("result", String[].class);
                                 String answer = capthchaXYMatching(autoCheckImgIndex);
                                 resultCode = HttpURL12306.checkImgCapthcha(answer, timer);
@@ -178,10 +174,10 @@ public class UserLoginServiceImpl implements UserLoginService {
      * @return
      */
     @Override
-    public RestResult userPassportUamtk(String appId) {
+    public RestResult userPassportUamtk(String appId, String uamtk) {
         if (StringUtils.isNotBlank(appId)) {
             try {
-                String result = HttpURL12306.loginSuccessPassportUamtk(appId);
+                String result = HttpURL12306.loginSuccessPassportUamtk(appId, uamtk);
                 if (StringUtils.isBlank(result)) {
                     return RestResult.SUCCESS().message("认证失败").data("5").build();
                 }
@@ -194,6 +190,44 @@ public class UserLoginServiceImpl implements UserLoginService {
     }
 
     /**
+     * 获取用户名
+     *
+     * @param tk
+     * @return
+     */
+    @Override
+    public RestResult getUserName(String tk) {
+        if (StringUtils.isNotBlank(tk)) {
+            try {
+                String result = HttpURL12306.getUserName(tk);
+                if (!StringUtils.equals(result, "5")) {
+                    return RestResult.SUCCESS().message("获取用户名成功").data(result).build();
+                } else {
+                    return RestResult.SUCCESS().message("获取用户名失败").data(result).build();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return RestResult.ERROR_PARAMS().message("uamtk为空，无法获取用户名").build();
+    }
+
+    /**
+     * 用户退出
+     *
+     * @return
+     */
+    @Override
+    public RestResult loginOut() {
+        try {
+            HttpURL12306.loginOut();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return RestResult.SUCCESS().message("退出成功").build();
+    }
+
+    /**
      * 验证码坐标匹配
      *
      * @param imgIndexArr
@@ -201,34 +235,36 @@ public class UserLoginServiceImpl implements UserLoginService {
      */
     private String capthchaXYMatching(String[] imgIndexArr) {
         StringJoiner answer = new StringJoiner(",");
-        for (String index : imgIndexArr) {
-            switch (index) {
-                case "1":
-                    answer.add(this.yzm1Point);
-                    break;
-                case "2":
-                    answer.add(this.yzm2Point);
-                    break;
-                case "3":
-                    answer.add(this.yzm3Point);
-                    break;
-                case "4":
-                    answer.add(this.yzm4Point);
-                    break;
-                case "5":
-                    answer.add(this.yzm5Point);
-                    break;
-                case "6":
-                    answer.add(this.yzm6Point);
-                    break;
-                case "7":
-                    answer.add(this.yzm7Point);
-                    break;
-                case "8":
-                    answer.add(this.yzm8Point);
-                    break;
-                default:
-                    break;
+        if (imgIndexArr != null && imgIndexArr.length > 0) {
+            for (String index : imgIndexArr) {
+                switch (index) {
+                    case "1":
+                        answer.add(this.yzm1Point);
+                        break;
+                    case "2":
+                        answer.add(this.yzm2Point);
+                        break;
+                    case "3":
+                        answer.add(this.yzm3Point);
+                        break;
+                    case "4":
+                        answer.add(this.yzm4Point);
+                        break;
+                    case "5":
+                        answer.add(this.yzm5Point);
+                        break;
+                    case "6":
+                        answer.add(this.yzm6Point);
+                        break;
+                    case "7":
+                        answer.add(this.yzm7Point);
+                        break;
+                    case "8":
+                        answer.add(this.yzm8Point);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
         return answer.toString();

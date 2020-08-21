@@ -49,5 +49,18 @@ public interface UserLoginService {
      * @param appId
      * @return
      */
-    RestResult userPassportUamtk(String appId);
+    RestResult userPassportUamtk(String appId,String uamtk);
+
+    /**
+     * 获取用户名
+     * @param tk
+     * @return
+     */
+    RestResult getUserName(String tk);
+
+    /**
+     * 用户退出
+     * @return
+     */
+    RestResult loginOut();
 }

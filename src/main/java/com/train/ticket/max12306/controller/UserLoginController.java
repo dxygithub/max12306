@@ -50,22 +50,44 @@ public class UserLoginController {
 
     /**
      * 用户登录
+     *
      * @param loginRequest
      * @return
      */
     @PostMapping("/max/userLogin")
-    public RestResult userLogin(UserLoginRequest loginRequest){
+    public RestResult userLogin(UserLoginRequest loginRequest) {
         return userLoginService.userLogin(loginRequest);
     }
 
     /**
      * 用户认证
+     *
      * @param appId
      * @return
      */
     @PostMapping("/max/passPortUamtk")
-    public RestResult passPortUamtk(String appId){
-        return userLoginService.userPassportUamtk(appId);
+    public RestResult passPortUamtk(String appId,String uamtk) {
+        return userLoginService.userPassportUamtk(appId,uamtk);
+    }
+
+    /**
+     * 获取用户名
+     *
+     * @param tk
+     * @return
+     */
+    @PostMapping("/max/getUserName")
+    public RestResult getUserName(String tk) {
+        return userLoginService.getUserName(tk);
+    }
+
+    /**
+     * 用户退出
+     * @return
+     */
+    @GetMapping("/max/userLoginOut")
+    public RestResult userLoginOut(){
+        return userLoginService.loginOut();
     }
 
     /**

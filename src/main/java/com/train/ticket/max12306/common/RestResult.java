@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * @ClassName RestResult
+ * @ClassName RestResult 统一请求返回结果
  * @Author duxiaoyu
  * @Date 2020/8/14 10:42
  * @Version 1.0

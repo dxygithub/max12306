@@ -4,7 +4,7 @@ import com.train.ticket.max12306.enumeration.TicketType;
 import lombok.Data;
 
 /**
- * @ClassName QueryTicketRequest
+ * @ClassName QueryTicketRequest 查票价格查询form
  * @Author duxiaoyu
  * @Date 2020/7/29 17:48
  * @Version 1.0

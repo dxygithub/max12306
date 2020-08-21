@@ -30,6 +30,7 @@ public class StationInfoServiceImpl implements StationInfoService {
 
     /**
      * 获取车站总记录数
+     *
      * @return
      */
     @Override
@@ -73,7 +74,7 @@ public class StationInfoServiceImpl implements StationInfoService {
         try {
             stationInfos = HttpURL12306.parseStationInfo();
             if (!CollectionUtils.isEmpty(stationInfos)) {
-                // 车站信息去重排序，直接请求12306获取到的车站信息可能会有重复的
+                // 直接请求12306获取到的车站信息可能会有重复数据，需要去重排序
                 stationInfos = stationInfos.stream().filter(HttpURL12306.distinctByKey(StationInfo::getStationCode)).sorted(Comparator.comparing(StationInfo::getStationSort)).collect(Collectors.toList());
             }
         } catch (Exception e) {

@@ -26,6 +26,21 @@ public interface HttpURLConstant12306 {
     String LOGIN_INIT = "https://kyfw.12306.cn/otn/login/init";
 
     /**
+     * 获取cookie: route: get
+     */
+    String LOGIN_BANNER="https://kyfw.12306.cn/otn/index12306/getLoginBanner";
+
+    /**
+     * 获取JSESESSIONID:get
+     */
+    String JSESESSIONID="https://kyfw.12306.cn/otn/passport?redirect=/otn/login/userLogin";
+
+    /**
+     * 获取cookie: uKey(cookie中携带tk获取): get
+     */
+    String USER_LOGIN="https://kyfw.12306.cn/otn/login/userLogin";
+
+    /**
      * 车票查询url: get(出发日期:{1}、始发站:{2}、终点站:{3}、车票类型:{4})
      */
     String TICKET_QUERY_URL = "https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={1}&leftTicketDTO.from_station={2}&leftTicketDTO.to_station={3}&purpose_codes={4}";
@@ -47,6 +62,7 @@ public interface HttpURLConstant12306 {
 
     /**
      * 图片验证码OCR校验: post(img: img-baseCode64)
+     * 校验响应速度较慢
      */
     String OCR_AUTO_CHECK="https://12306-ocr.pjialin.com/check/";
 
@@ -64,6 +80,26 @@ public interface HttpURLConstant12306 {
      * 用户认证: post(appid)
      */
     String PASSPORT_UAMTK_URL="https://kyfw.12306.cn/passport/web/auth/uamtk";
+
+    /**
+     * 用户认证：get(appid)
+     */
+    String PASSPORT_UAMTK_STATIC_URL="https://kyfw.12306.cn/passport/web/auth/uamtk-static";
+
+    /**
+     * 登录页面
+     */
+    String LOGIN_INIT_CDN1="https://kyfw.12306.cn/otn/resources/login.html";
+
+    /**
+     * 用户退出
+     */
+    String LOGIN_OUT="https://kyfw.12306.cn/otn/login/loginOut";
+
+    /**
+     * 获取用户信息: post(tk)
+     */
+    String API_AUTH_UAMAUTHCLIENT="https://kyfw.12306.cn/otn/uamauthclient";
 
     /**
      * 获取RAIL_EXPIRATION和RAIL_DEVICEID参数：get(algID:{1}、hashCode:{2}、timestamp:{3}当前时间毫秒数)

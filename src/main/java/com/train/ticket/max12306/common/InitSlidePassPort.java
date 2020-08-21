@@ -3,7 +3,7 @@ package com.train.ticket.max12306.common;
 import lombok.Data;
 
 /**
- * @ClassName InitSlidePassPort
+ * @ClassName InitSlidePassPort 初始化阿里云滑块验证
  * @Author duxiaoyu
  * @Date 2020/8/18 15:28
  * @Version 1.0

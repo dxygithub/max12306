@@ -3,7 +3,7 @@ package com.train.ticket.max12306.common;
 import lombok.Data;
 
 /**
- * @ClassName QueryTicketPriceRequest
+ * @ClassName QueryTicketPriceRequest 查票查询form
  * @Author duxiaoyu
  * @Date 2020/7/31 10:32
  * @Version 1.0
