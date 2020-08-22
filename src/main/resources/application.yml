@@ -5,11 +5,15 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://139.224.81.29/max12306?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
     username: root
-    password: Duxiaoyu@123
+    password: ENC(a5rsd8uK8dVi94FUIw0AQdZSId+S8j1v)
 
 mybatis-max:
   mapper-locations: classpath:/mapper/*Mapper.xml
   banner: true
+
+jasypt:
+  encryptor:
+    password: NDEyZWQyZTlhZWJhODY2NjRhYTYyYTg3ZTI5NmExYjU=
 
 logging:
   level:
