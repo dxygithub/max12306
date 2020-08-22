@@ -68,9 +68,9 @@ public class HttpURL12306 {
     private static final String BIGIPSERVERPOOLPASSPORT = "267190794.50215.0000";
 
     private static final String BIGIPSERVEROTN = "2547450122.50210.0000";
+    // ip坐标参数: 目前暂时不知何处用到
 
     private static final String ROUTE = "9036359bb8a8a461c164a04f8f50b252";
-    // ip坐标参数: 目前暂时不知何处用到
 
     /**
      * 不变参数：请求始终携带

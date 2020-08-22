@@ -45,7 +45,7 @@
         </dependency>
         <!--SQLTools-->
 
-        <!--避免https证书认证接口jar-->
+        <!--httpUtils-->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
@@ -56,7 +56,7 @@
             <artifactId>httpmime</artifactId>
             <version>4.5.3</version>
         </dependency>
-        <!--避免https证书认证接口jar-->
+        <!--httpUtils-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
