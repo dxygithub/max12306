@@ -1,6 +1,7 @@
 package com.train.ticket.max12306.service;
 
 import com.train.ticket.max12306.common.InitSlidePassPort;
+import com.train.ticket.max12306.common.PassengersVo;
 import com.train.ticket.max12306.common.RestResult;
 import com.train.ticket.max12306.common.UserLoginRequest;
 
@@ -63,4 +64,23 @@ public interface UserLoginService {
      * @return
      */
     RestResult loginOut();
+
+    /**
+     * 获取乘车人
+     * @return
+     */
+    RestResult getPassengers();
+
+    /**
+     * 删除乘车人
+     * @param passengersVo
+     * @return
+     */
+    RestResult delPassenger(PassengersVo passengersVo);
+
+    /**
+     * 获取订单信息
+     * @return
+     */
+    RestResult getOrderInfo();
 }

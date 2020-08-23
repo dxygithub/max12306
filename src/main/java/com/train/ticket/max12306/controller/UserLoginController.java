@@ -1,9 +1,6 @@
 package com.train.ticket.max12306.controller;
 
-import com.train.ticket.max12306.common.HttpURL12306;
-import com.train.ticket.max12306.common.InitSlidePassPort;
-import com.train.ticket.max12306.common.RestResult;
-import com.train.ticket.max12306.common.UserLoginRequest;
+import com.train.ticket.max12306.common.*;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,8 +63,8 @@ public class UserLoginController {
      * @return
      */
     @PostMapping("/max/passPortUamtk")
-    public RestResult passPortUamtk(String appId,String uamtk) {
-        return userLoginService.userPassportUamtk(appId,uamtk);
+    public RestResult passPortUamtk(String appId, String uamtk) {
+        return userLoginService.userPassportUamtk(appId, uamtk);
     }
 
     /**
@@ -82,11 +79,43 @@ public class UserLoginController {
     }
 
     /**
+     * 获取乘车人
+     *
+     * @return
+     */
+    @GetMapping("/max/getPassengers")
+    public RestResult getPassengers() {
+        return userLoginService.getPassengers();
+    }
+
+    /**
+     * 获取订单信息
+     *
+     * @return
+     */
+    @GetMapping("/max/getOrderInfo")
+    public RestResult getOrderInfo() {
+        return userLoginService.getOrderInfo();
+    }
+
+    /**
+     * 删除乘车人
+     *
+     * @param passengersVo
+     * @return
+     */
+    @PostMapping("/max/delPassenger")
+    public RestResult delPassenger(PassengersVo passengersVo) {
+        return userLoginService.delPassenger(passengersVo);
+    }
+
+    /**
      * 用户退出
+     *
      * @return
      */
     @GetMapping("/max/userLoginOut")
-    public RestResult userLoginOut(){
+    public RestResult userLoginOut() {
         return userLoginService.loginOut();
     }
 

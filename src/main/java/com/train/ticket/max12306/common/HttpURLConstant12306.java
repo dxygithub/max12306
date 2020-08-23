@@ -87,19 +87,34 @@ public interface HttpURLConstant12306 {
     String PASSPORT_UAMTK_STATIC_URL="https://kyfw.12306.cn/passport/web/auth/uamtk-static";
 
     /**
-     * 登录页面
+     * 登录页面: get
      */
     String LOGIN_INIT_CDN1="https://kyfw.12306.cn/otn/resources/login.html";
 
     /**
-     * 用户退出
+     * 用户退出: get
      */
     String LOGIN_OUT="https://kyfw.12306.cn/otn/login/loginOut";
+
+    /**
+     * 查询乘车人信息: post
+     */
+    String PASSENGERS_QUERY="https://kyfw.12306.cn/otn/passengers/query";
 
     /**
      * 获取用户信息: post(tk)
      */
     String API_AUTH_UAMAUTHCLIENT="https://kyfw.12306.cn/otn/uamauthclient";
+
+    /**
+     * 删除乘车人: post
+     */
+    String DEL_PASSENGERS="https://kyfw.12306.cn/otn/passengers/delete";
+
+    /**
+     * 查询我的订单: post
+     */
+    String QUERY_MY_ORDER="https://kyfw.12306.cn/otn/queryOrder/queryMyOrder";
 
     /**
      * 获取RAIL_EXPIRATION和RAIL_DEVICEID参数：get(algID:{1}、hashCode:{2}、timestamp:{3}当前时间毫秒数)

@@ -3,10 +3,9 @@ package com.train.ticket.max12306.common;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.train.ticket.max12306.entity.StationInfo;
-import com.train.ticket.max12306.entity.TicketInfo;
-import com.train.ticket.max12306.entity.TicketPrice;
+import com.train.ticket.max12306.entity.*;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
+import javafx.print.PaperSource;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -76,13 +75,13 @@ public class HttpURL12306 {
      * 不变参数：请求始终携带
      * 注意，该参数会过期，后期动态获取
      */
-    private static final String RAIL_EXPIRATION="1598289613808";
+    private static final String RAIL_EXPIRATION = "1598289613808";
 
     /**
      * 不变参数：请求始终携带
      * 注意，该参数会过期，后期动态获取
      */
-    private static final String RAIL_DEVICEID="n67XbP7ovkwaLdDDYNrB8aM1PzL-Z87EBhLFbUPAikHuHOvm7lWP3BwkSds9-W99OAXHLO2jHCGGLmWMAd7N0XOT8zyrc7zc4CuAXRmxiFFGI09_xJdz5TCufAb9c1EukYkAKkEhYN4maUbLJY60318VDK0eHL3U";
+    private static final String RAIL_DEVICEID = "n67XbP7ovkwaLdDDYNrB8aM1PzL-Z87EBhLFbUPAikHuHOvm7lWP3BwkSds9-W99OAXHLO2jHCGGLmWMAd7N0XOT8zyrc7zc4CuAXRmxiFFGI09_xJdz5TCufAb9c1EukYkAKkEhYN4maUbLJY60318VDK0eHL3U";
 
 
     /**
@@ -460,6 +459,8 @@ public class HttpURL12306 {
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("tk", tk));
             HttpPost post = httpPostBuild(HttpURLConstant12306.API_AUTH_UAMAUTHCLIENT, formPail, getCookieStr(null));
+            post.addHeader("Referer", "https://kyfw.12306.cn/otn/passport?redirect=/otn/login/userLogin");
+            post.addHeader("Origin", "https://kyfw.12306.cn");
             try (CloseableHttpResponse response = client.execute(post, context)) {
                 HttpEntity entity = response.getEntity();
                 String result = EntityUtils.toString(entity);
@@ -471,7 +472,7 @@ public class HttpURL12306 {
                         String userName = json.get("username", String.class);
                         cacheCookie(cookieStore.getCookies());
                         LOGGER.info("======> 获取用户名成功 -> {}", userName);
-                        LOGGER.info("======> Cookie: {}", getCookieStr(null));
+                        LOGGER.info("======> Cookies: {}", getCookieStr(null));
                         return userName;
                     } else {
                         LOGGER.info("======> 获取用户名失败，原因: {}...", json.get("result_message", String.class));
@@ -485,6 +486,114 @@ public class HttpURL12306 {
         }
     }
 
+
+    /**
+     * 获取乘车人信息
+     */
+    public static List<PassengerInfo> getPassengersInfo() throws Exception {
+        try (CloseableHttpClient client = httpClientBuild()) {
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("pageIndex", "1"));
+            formPail.add(new BasicNameValuePair("pageSize", "10"));
+            HttpPost post = httpPostBuild(HttpURLConstant12306.PASSENGERS_QUERY, formPail, getCookieStr(null));
+            try (CloseableHttpResponse response = client.execute(post, context)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if (SUCCESS == json.get("httpstatus", Integer.class)) {
+                        LOGGER.info("======> 获取乘车人成功...");
+                        return settingPassengerInfo(json);
+                    } else {
+                        LOGGER.info("======> 获取乘车人失败...");
+                    }
+                } else {
+                    LOGGER.info("======> 获取乘车人失败...");
+                }
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * 获取订单信息
+     *
+     * @return
+     * @throws Exception
+     */
+    public static List<MyOrder> getOrderInfo() throws Exception {
+        try (CloseableHttpClient client = httpClientBuild()) {
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("pageIndex", "0"));
+            formPail.add(new BasicNameValuePair("pageSize", "10"));
+            formPail.add(new BasicNameValuePair("come_from_flag", "my_order"));
+            formPail.add(new BasicNameValuePair("query_where", "H"));
+            formPail.add(new BasicNameValuePair("queryStartDate", "2020-08-07"));
+            formPail.add(new BasicNameValuePair("queryEndDate", "2020-08-22"));
+            formPail.add(new BasicNameValuePair("sequeue_train_name", ""));
+            formPail.add(new BasicNameValuePair("queryType", "1"));
+            HttpPost post = httpPostBuild(HttpURLConstant12306.QUERY_MY_ORDER, formPail, getCookieStr(null));
+            try (CloseableHttpResponse response = client.execute(post, context)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if (SUCCESS == json.get("httpstatus", Integer.class)) {
+                        LOGGER.info("======> 获取订单信息成功...");
+                        return settingOrderInfo(json.get("data", JSONObject.class));
+                    } else {
+                        LOGGER.info("======> 获取订单信息失败...");
+                    }
+                } else {
+                    LOGGER.info("======> 获取订单信息失败...");
+                }
+            }
+        }
+        return Collections.emptyList();
+    }
+
+
+    /**
+     * 删除乘车人信息
+     *
+     * @param passengersVo
+     * @return
+     */
+    public static String delPassenger(PassengersVo passengersVo) throws Exception {
+        try (CloseableHttpClient client = httpClientBuild()) {
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("passenger_name", passengersVo.getPassengerName()));
+            formPail.add(new BasicNameValuePair("passenger_id_type_code", passengersVo.getPassengerIdTypeCode()));
+            formPail.add(new BasicNameValuePair("passenger_id_no", passengersVo.getPassengerIdNo()));
+            formPail.add(new BasicNameValuePair("isUserSelf", passengersVo.getIsUserSelf()));
+            formPail.add(new BasicNameValuePair("allEncStr", passengersVo.getAllEncStr()));
+            HttpPost post = httpPostBuild(HttpURLConstant12306.DEL_PASSENGERS, formPail, getCookieStr(null));
+            try (CloseableHttpResponse response = client.execute(post, context)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if (SUCCESS == json.get("httpstatus", Integer.class)) {
+                        String message = json.get("data", JSONObject.class).get("message", String.class);
+                        boolean flag = json.get("data", JSONObject.class).get("flag", boolean.class);
+                        LOGGER.info("======> 删除乘车人: {}，结果: {}...", passengersVo.getPassengerName(), message);
+                        if (flag) {
+                            return message + "-0";
+                        } else {
+                            return message + "-1";
+                        }
+                    }
+                }
+            }
+        }
+        return "删除失败";
+    }
 
     /**
      * 用户退出登录
@@ -550,6 +659,74 @@ public class HttpURL12306 {
         }
         return list;
     }
+
+    /**
+     * 设置乘车人信息
+     *
+     * @return
+     */
+    public static List<PassengerInfo> settingPassengerInfo(JSONObject json) {
+        List<JSONObject> array = JSONUtil.toList(json.get("data", JSONObject.class).getJSONArray("datas"), JSONObject.class);
+        List<PassengerInfo> passengerInfos = new ArrayList<>();
+        array.forEach(x -> {
+            PassengerInfo passengerInfo = new PassengerInfo();
+            passengerInfo.setAddress(x.get("address", String.class));
+            passengerInfo.setAllEncStr(x.get("allEncStr", String.class));
+            passengerInfo.setBornDate(x.get("born_date", String.class));
+            passengerInfo.setFirstLetter(x.get("first_letter", String.class));
+            passengerInfo.setMobileNo(x.get("mobile_no", String.class));
+            passengerInfo.setPassengerIdNo(x.get("passenger_id_no", String.class));
+            passengerInfo.setPassengerIdTypeCode(x.get("passenger_id_type_code", String.class));
+            passengerInfo.setPassengeridTypeName(x.get("passenger_id_type_name", String.class));
+            passengerInfo.setPassengerName(x.get("passenger_name", String.class));
+            passengerInfo.setPassengerType(x.get("passenger_type", String.class));
+            passengerInfo.setPassengerTypeName(x.get("passenger_type_name", String.class));
+            passengerInfo.setPassengerUUid(x.get("passenger_uuid", String.class));
+            passengerInfo.setSexCode(x.get("sex_code", String.class));
+            passengerInfo.setSexName(x.get("sex_name", String.class));
+            passengerInfo.setIsUserSelf(x.get("isUserSelf", String.class));
+            passengerInfos.add(passengerInfo);
+        });
+        return passengerInfos;
+    }
+
+    /**
+     * 设置订单信息
+     *
+     * @param json
+     * @return
+     */
+    public static List<MyOrder> settingOrderInfo(JSONObject json) {
+        List<JSONObject> array = JSONUtil.toList(json.getJSONArray("OrderDTODataList"), JSONObject.class);
+        List<MyOrder> orderList = new ArrayList<>();
+        array.forEach(x -> {
+            List<JSONObject> tickets = JSONUtil.toList(x.getJSONArray("tickets"), JSONObject.class);
+            tickets.forEach(t -> {
+                MyOrder order = new MyOrder();
+                JSONObject passenger = t.get("passengerDTO", JSONObject.class);
+                JSONObject stationTrain = t.get("stationTrainDTO", JSONObject.class);
+                // 开始设置订单信息
+                order.setArrayPassserNamePage(passenger.get("passenger_name", String.class));
+                order.setFromStationNamePage(stationTrain.get("from_station_name", String.class));
+                order.setToStationNamePage(stationTrain.get("to_station_name", String.class));
+                order.setOrderDate(x.get("order_date", String.class));
+                order.setSequenceNo(x.get("sequence_no", String.class));
+                order.setStartTrainDatePage(x.get("start_train_date_page", String.class));
+                order.setTrainCodePage(x.get("train_code_page", String.class));
+                order.setTicketTotalPricePage(x.get("ticket_total_price_page", String.class));
+                order.setTicketTotalnum(x.get("ticket_totalnum", String.class));
+                order.setCoachNo(t.get("coach_no", String.class));
+                order.setSeatName(t.get("seat_name", String.class));
+                order.setSeatTypeName(t.get("seat_type_name", String.class));
+                order.setStrTicketPricePage(t.get("str_ticket_price_page", String.class));
+                order.setTicketStatusName(t.get("ticket_status_name", String.class));
+                order.setTicketTypeName(t.get("ticket_type_name", String.class));
+                orderList.add(order);
+            });
+        });
+        return orderList;
+    }
+
 
     /**
      * 设置车票价格信息

@@ -3,6 +3,8 @@ package com.train.ticket.max12306.service.impl;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.common.*;
+import com.train.ticket.max12306.entity.MyOrder;
+import com.train.ticket.max12306.entity.PassengerInfo;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -210,6 +212,58 @@ public class UserLoginServiceImpl implements UserLoginService {
             }
         }
         return RestResult.ERROR_PARAMS().message("uamtk为空，无法获取用户名").build();
+    }
+
+    /**
+     * 获取乘车人
+     *
+     * @return
+     */
+    @Override
+    public RestResult getPassengers() {
+        try {
+            List<PassengerInfo> passengerInfos = HttpURL12306.getPassengersInfo();
+            return RestResult.SUCCESS().data(passengerInfos).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return RestResult.SERVER_ERROR().build();
+    }
+
+    /**
+     * 获取订单信息
+     *
+     * @return
+     */
+    @Override
+    public RestResult getOrderInfo() {
+
+        try {
+            List<MyOrder> orderList = HttpURL12306.getOrderInfo();
+            return RestResult.SUCCESS().data(orderList).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return RestResult.ERROR_PARAMS().build();
+    }
+
+    /**
+     * 删除乘车人
+     *
+     * @param passengersVo
+     * @return
+     */
+    @Override
+    public RestResult delPassenger(PassengersVo passengersVo) {
+        if (Objects.nonNull(passengersVo)) {
+            try {
+                String result = HttpURL12306.delPassenger(passengersVo);
+                return RestResult.SUCCESS().data(result).build();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return RestResult.ERROR_PARAMS().message("参数为空").build();
     }
 
     /**
