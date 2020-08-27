@@ -1,9 +1,9 @@
 package com.train.ticket.max12306.service;
 
-import com.train.ticket.max12306.common.InitSlidePassPort;
-import com.train.ticket.max12306.common.PassengersVo;
+import com.train.ticket.max12306.requestvo.InitSlidePassPort;
+import com.train.ticket.max12306.requestvo.PassengersVo;
 import com.train.ticket.max12306.common.RestResult;
-import com.train.ticket.max12306.common.UserLoginRequest;
+import com.train.ticket.max12306.requestvo.UserLoginRequest;
 
 /**
  * @ClassName UserLogin
@@ -72,6 +72,13 @@ public interface UserLoginService {
     RestResult getPassengers();
 
     /**
+     * 新增乘车人
+     * @param passengersVo
+     * @return
+     */
+    RestResult addPassengers(PassengersVo passengersVo);
+
+    /**
      * 删除乘车人
      * @param passengersVo
      * @return
@@ -82,5 +89,11 @@ public interface UserLoginService {
      * 获取订单信息
      * @return
      */
-    RestResult getOrderInfo();
+    RestResult getOrderInfo(String queryStartDate,String queryEndDate,String queryWhere);
+
+    /**
+     * 获取未完成的订单
+     * @return
+     */
+    RestResult getOrderNoComplete();
 }

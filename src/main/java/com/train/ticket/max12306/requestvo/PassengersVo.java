@@ -1,4 +1,4 @@
-package com.train.ticket.max12306.common;
+package com.train.ticket.max12306.requestvo;
 
 import lombok.Data;
 
@@ -34,4 +34,24 @@ public class PassengersVo {
      * 乘车人姓名
      */
     private String passengerName;
+
+    /**
+     * 性别
+     */
+    private String sexCode;
+
+    /**
+     * 手机号码
+     */
+    private String mobileNo;
+
+    /**
+     * 默认：CN
+     */
+    private String countryCode;
+
+    /**
+     * 旅客类型
+     */
+    private String passengerType;
 }

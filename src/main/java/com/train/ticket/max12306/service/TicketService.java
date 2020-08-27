@@ -1,7 +1,7 @@
 package com.train.ticket.max12306.service;
 
-import com.train.ticket.max12306.common.QueryTicketPriceRequest;
-import com.train.ticket.max12306.common.QueryTicketRequest;
+import com.train.ticket.max12306.requestvo.QueryTicketPriceRequest;
+import com.train.ticket.max12306.requestvo.QueryTicketRequest;
 import com.train.ticket.max12306.entity.TicketInfo;
 import com.train.ticket.max12306.entity.TicketPrice;
 

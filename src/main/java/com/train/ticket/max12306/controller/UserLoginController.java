@@ -1,9 +1,11 @@
 package com.train.ticket.max12306.controller;
 
 import com.train.ticket.max12306.common.*;
+import com.train.ticket.max12306.requestvo.InitSlidePassPort;
+import com.train.ticket.max12306.requestvo.PassengersVo;
+import com.train.ticket.max12306.requestvo.UserLoginRequest;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,8 +23,8 @@ public class UserLoginController {
     @Autowired
     private UserLoginService userLoginService;
 
-    @Value("${autoCheck}")
-    private boolean autoCheck;
+    @Autowired
+    private ConfigFileUtil config;
 
     /**
      * 获取图片验证码
@@ -94,8 +96,17 @@ public class UserLoginController {
      * @return
      */
     @GetMapping("/max/getOrderInfo")
-    public RestResult getOrderInfo() {
-        return userLoginService.getOrderInfo();
+    public RestResult getOrderInfo(String queryStartDate,String queryEndDate,String queryWhere) {
+        return userLoginService.getOrderInfo(queryStartDate,queryEndDate,queryWhere);
+    }
+
+    /**
+     * 获取未完成的订单信息
+     * @return
+     */
+    @GetMapping("/max/getOrderNoComplete")
+    public RestResult getOrderNoComplete(){
+        return userLoginService.getOrderNoComplete();
     }
 
     /**
@@ -107,6 +118,16 @@ public class UserLoginController {
     @PostMapping("/max/delPassenger")
     public RestResult delPassenger(PassengersVo passengersVo) {
         return userLoginService.delPassenger(passengersVo);
+    }
+
+    /**
+     * 新增乘车人
+     * @param passengersVo
+     * @return
+     */
+    @PostMapping("/max/addPassenger")
+    public RestResult addPassenger(PassengersVo passengersVo){
+        return userLoginService.addPassengers(passengersVo);
     }
 
     /**
@@ -127,10 +148,10 @@ public class UserLoginController {
      */
     @GetMapping("/max/checkImgCapthcha")
     public RestResult checkImgCapthcha(String imgIndex, String timer) {
-        if (this.autoCheck) {
-            return userLoginService.checkImgCaptcha(imgIndex, timer, HttpURL12306.IMG_CAPTHCHA_MAP.get(timer), this.autoCheck);
+        if (config.isAutoCheck()) {
+            return userLoginService.checkImgCaptcha(imgIndex, timer, HttpURL12306.IMG_CAPTHCHA_MAP.get(timer), config.isAutoCheck());
         } else {
-            return userLoginService.checkImgCaptcha(imgIndex, timer, "", this.autoCheck);
+            return userLoginService.checkImgCaptcha(imgIndex, timer, "", config.isAutoCheck());
         }
     }
 }

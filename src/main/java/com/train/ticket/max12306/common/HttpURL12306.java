@@ -5,7 +5,7 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.entity.*;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
-import javafx.print.PaperSource;
+import com.train.ticket.max12306.requestvo.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -28,7 +28,8 @@ import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.net.ssl.SSLContext;
@@ -46,7 +47,7 @@ import java.util.function.Predicate;
  * @Date 2020/7/28 18:14
  * @Version 1.0
  */
-@Service
+@Component
 public class HttpURL12306 {
 
 
@@ -54,35 +55,10 @@ public class HttpURL12306 {
 
     private static final int SUCCESS = 200;
 
-    /**
-     * 12306 cookie参数
-     */
-    private static final String _PASSPORT_SESSION = "a69ac41615284240b6cd31854f9d95834808";
-
-    private static final String _PASSPORT_CT = "fd00db58fc7b4fd4bd34783b365a8ecbt3670";
-
-    // ip坐标参数: 目前暂时不知何处用到
     private static final String BIGIPSERVERPASSPORT = "820510986.50215.0000";
 
-    private static final String BIGIPSERVERPOOLPASSPORT = "267190794.50215.0000";
-
-    private static final String BIGIPSERVEROTN = "2547450122.50210.0000";
-    // ip坐标参数: 目前暂时不知何处用到
-
-    private static final String ROUTE = "9036359bb8a8a461c164a04f8f50b252";
-
-    /**
-     * 不变参数：请求始终携带
-     * 注意，该参数会过期，后期动态获取
-     */
-    private static final String RAIL_EXPIRATION = "1598289613808";
-
-    /**
-     * 不变参数：请求始终携带
-     * 注意，该参数会过期，后期动态获取
-     */
-    private static final String RAIL_DEVICEID = "n67XbP7ovkwaLdDDYNrB8aM1PzL-Z87EBhLFbUPAikHuHOvm7lWP3BwkSds9-W99OAXHLO2jHCGGLmWMAd7N0XOT8zyrc7zc4CuAXRmxiFFGI09_xJdz5TCufAb9c1EukYkAKkEhYN4maUbLJY60318VDK0eHL3U";
-
+    @Autowired
+    private ConfigFileUtil config;
 
     /**
      * 车站信息Map
@@ -91,7 +67,6 @@ public class HttpURL12306 {
 
     /**
      * 图片验证码Map
-     * 缓存已获取的验证码
      */
     public static final Map<String, String> IMG_CAPTHCHA_MAP = new HashMap<>();
 
@@ -116,7 +91,7 @@ public class HttpURL12306 {
      * @return
      * @throws Exception
      */
-    public static List<StationInfo> parseStationInfo() throws Exception {
+    public List<StationInfo> parseStationInfo() throws Exception {
         try (CloseableHttpClient httpClient = httpClientBuild()) {
             HttpGet httpGet = httpGetBuild(HttpURLConstant12306.STATION_INFO_URL, getCookieStr(null));
             try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet, context)) {
@@ -161,7 +136,7 @@ public class HttpURL12306 {
      * @return
      * @throws Exception
      */
-    public static List<TicketInfo> parseTicketInfo(QueryTicketRequest ticketRequest) throws Exception {
+    public List<TicketInfo> parseTicketInfo(QueryTicketRequest ticketRequest) throws Exception {
         if (Objects.nonNull(ticketRequest)) {
             try (CloseableHttpClient httpClient = httpClientBuild()) {
                 HttpGet httpGet = httpGetBuild(HttpURLConstant12306.TICKET_QUERY_URL.
@@ -211,7 +186,7 @@ public class HttpURL12306 {
      * @param ticketPriceRequest
      * @return
      */
-    public static TicketPrice parseTicketPrice(QueryTicketPriceRequest ticketPriceRequest) throws Exception {
+    public TicketPrice parseTicketPrice(QueryTicketPriceRequest ticketPriceRequest) throws Exception {
         if (Objects.nonNull(ticketPriceRequest)) {
             try (CloseableHttpClient httpClient = httpClientBuild()) {
                 HttpGet httpGet = httpGetBuild(HttpURLConstant12306.TICKET_PRICE_QUERY_URL.
@@ -253,7 +228,7 @@ public class HttpURL12306 {
      *
      * @return
      */
-    public static String getImgCaptcha() throws Exception {
+    public String getImgCaptcha() throws Exception {
         try (CloseableHttpClient httpClient = httpClientBuild()) {
             String currentMills = String.valueOf(System.currentTimeMillis());
             HttpGet httpGet = httpGetBuild(HttpURLConstant12306.GET_CAPTCHA.
@@ -293,7 +268,7 @@ public class HttpURL12306 {
      * @param answer
      * @return
      */
-    public static String checkImgCapthcha(String answer, String timer) throws Exception {
+    public String checkImgCapthcha(String answer, String timer) throws Exception {
         try (CloseableHttpClient httpClient = httpClientBuild()) {
             HttpGet httpGet = httpGetBuild(HttpURLConstant12306.CHECK_CAPTCHA.
                     replace("{xyz}", answer).
@@ -328,7 +303,7 @@ public class HttpURL12306 {
      * @return
      * @throws Exception
      */
-    public static String initSlidePassPort(InitSlidePassPort passPort) throws Exception {
+    public String initSlidePassPort(InitSlidePassPort passPort) throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("appid", passPort.getAppid()));
@@ -359,7 +334,7 @@ public class HttpURL12306 {
      * @param loginRequest
      * @return
      */
-    public static String loginRequest(UserLoginRequest loginRequest) throws Exception {
+    public String loginRequest(UserLoginRequest loginRequest) throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             HttpGet loginGet = httpGetBuild(HttpURLConstant12306.LOGIN_INIT, getCookieStr(null));
             try (CloseableHttpResponse loginResponse = client.execute(loginGet, context)) {
@@ -410,7 +385,7 @@ public class HttpURL12306 {
      * @param appId
      * @return
      */
-    public static String loginSuccessPassportUamtk(String appId, String uamtk) throws Exception {
+    public String loginSuccessPassportUamtk(String appId, String uamtk) throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             HttpGet loginGet = httpGetBuild(HttpURLConstant12306.LOGIN_INIT_CDN1, getCookieStr(null));
             try (CloseableHttpResponse loginResponse = client.execute(loginGet, context)) {
@@ -454,7 +429,7 @@ public class HttpURL12306 {
      * @return
      * @throws Exception
      */
-    public static String getUserName(String tk) throws Exception {
+    public String getUserName(String tk) throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("tk", tk));
@@ -490,7 +465,7 @@ public class HttpURL12306 {
     /**
      * 获取乘车人信息
      */
-    public static List<PassengerInfo> getPassengersInfo() throws Exception {
+    public List<PassengerInfo> getPassengersInfo() throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("pageIndex", "1"));
@@ -518,20 +493,20 @@ public class HttpURL12306 {
     }
 
     /**
-     * 获取订单信息
+     * 获取订单信息: 未出行订单query_where(G)、历史订单query_where(H)
      *
      * @return
      * @throws Exception
      */
-    public static List<MyOrder> getOrderInfo() throws Exception {
+    public List<MyOrder> getOrderInfo(String queryStartDate, String queryEndDate, String queryWhere) throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("pageIndex", "0"));
             formPail.add(new BasicNameValuePair("pageSize", "10"));
             formPail.add(new BasicNameValuePair("come_from_flag", "my_order"));
-            formPail.add(new BasicNameValuePair("query_where", "H"));
-            formPail.add(new BasicNameValuePair("queryStartDate", "2020-08-07"));
-            formPail.add(new BasicNameValuePair("queryEndDate", "2020-08-22"));
+            formPail.add(new BasicNameValuePair("query_where", queryWhere));
+            formPail.add(new BasicNameValuePair("queryStartDate", queryStartDate));
+            formPail.add(new BasicNameValuePair("queryEndDate", queryEndDate));
             formPail.add(new BasicNameValuePair("sequeue_train_name", ""));
             formPail.add(new BasicNameValuePair("queryType", "1"));
             HttpPost post = httpPostBuild(HttpURLConstant12306.QUERY_MY_ORDER, formPail, getCookieStr(null));
@@ -556,6 +531,38 @@ public class HttpURL12306 {
         return Collections.emptyList();
     }
 
+    /**
+     * 获取未完成订单: 待支付
+     *
+     * @return
+     * @throws Exception
+     */
+    public MyOrder getOrderNoComplete() throws Exception {
+        try (CloseableHttpClient client = httpClientBuild()) {
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("_json_att", ""));
+            HttpPost post = httpPostBuild(HttpURLConstant12306.QUERY_MY_ORDER_NO_COMPLETE, formPail, getCookieStr(null));
+            try (CloseableHttpResponse response = client.execute(post, context)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if (SUCCESS == json.get("httpstatus", Integer.class)) {
+                        LOGGER.info("======> 获取未完成订单信息成功...");
+                        return settingNoCompleteOrder(json.get("data", JSONObject.class));
+                    } else {
+                        LOGGER.info("======> 获取未完成订单信息失败...");
+                    }
+                } else {
+                    LOGGER.info("======> 获取未完成订单信息失败...");
+                }
+            }
+        }
+        return new MyOrder();
+    }
+
 
     /**
      * 删除乘车人信息
@@ -563,7 +570,7 @@ public class HttpURL12306 {
      * @param passengersVo
      * @return
      */
-    public static String delPassenger(PassengersVo passengersVo) throws Exception {
+    public String delPassenger(PassengersVo passengersVo) throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("passenger_name", passengersVo.getPassengerName()));
@@ -582,9 +589,9 @@ public class HttpURL12306 {
                     if (SUCCESS == json.get("httpstatus", Integer.class)) {
                         String message = json.get("data", JSONObject.class).get("message", String.class);
                         boolean flag = json.get("data", JSONObject.class).get("flag", boolean.class);
-                        LOGGER.info("======> 删除乘车人: {}，结果: {}...", passengersVo.getPassengerName(), message);
+                        LOGGER.info("======> 删除乘车人: {}，结果: {}...", passengersVo.getPassengerName(), flag);
                         if (flag) {
-                            return message + "-0";
+                            return "删除成功-0";
                         } else {
                             return message + "-1";
                         }
@@ -596,11 +603,52 @@ public class HttpURL12306 {
     }
 
     /**
+     * 新增乘车人
+     *
+     * @param passengersVo
+     * @return
+     * @throws Exception
+     */
+    public String addPassenger(PassengersVo passengersVo) throws Exception {
+        try (CloseableHttpClient client = httpClientBuild()) {
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("passenger_name", passengersVo.getPassengerName()));
+            formPail.add(new BasicNameValuePair("sex_code", passengersVo.getSexCode()));
+            formPail.add(new BasicNameValuePair("passenger_id_no", passengersVo.getPassengerIdNo()));
+            formPail.add(new BasicNameValuePair("mobile_no", passengersVo.getMobileNo()));
+            formPail.add(new BasicNameValuePair("country_code", "CN"));
+            formPail.add(new BasicNameValuePair("passenger_id_type_code", "1"));
+            formPail.add(new BasicNameValuePair("passenger_type", "1"));
+            HttpPost post = httpPostBuild(HttpURLConstant12306.ADD_PASSENGERS, formPail, getCookieStr(null));
+            try (CloseableHttpResponse response = client.execute(post, context)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if (SUCCESS == json.get("httpstatus", Integer.class)) {
+                        String message = json.get("data", JSONObject.class).get("message", String.class);
+                        boolean flag = json.get("data", JSONObject.class).get("flag", boolean.class);
+                        LOGGER.info("======> 新增乘车人: {}，结果: {}...", passengersVo.getPassengerName(), flag);
+                        if (flag) {
+                            return "新增成功-0";
+                        } else {
+                            return message + "-1";
+                        }
+                    }
+                }
+            }
+        }
+        return "新增失败";
+    }
+
+    /**
      * 用户退出登录
      *
      * @throws Exception
      */
-    public static void loginOut() throws Exception {
+    public void loginOut() throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             HttpGet get = httpGetBuild(HttpURLConstant12306.LOGIN_OUT, getCookieStr(null));
             // 执行退出，正常情况12306会重定向到登录页面
@@ -697,34 +745,75 @@ public class HttpURL12306 {
      * @return
      */
     public static List<MyOrder> settingOrderInfo(JSONObject json) {
-        List<JSONObject> array = JSONUtil.toList(json.getJSONArray("OrderDTODataList"), JSONObject.class);
         List<MyOrder> orderList = new ArrayList<>();
-        array.forEach(x -> {
-            List<JSONObject> tickets = JSONUtil.toList(x.getJSONArray("tickets"), JSONObject.class);
-            tickets.forEach(t -> {
-                MyOrder order = new MyOrder();
-                JSONObject passenger = t.get("passengerDTO", JSONObject.class);
-                JSONObject stationTrain = t.get("stationTrainDTO", JSONObject.class);
-                // 开始设置订单信息
-                order.setArrayPassserNamePage(passenger.get("passenger_name", String.class));
-                order.setFromStationNamePage(stationTrain.get("from_station_name", String.class));
-                order.setToStationNamePage(stationTrain.get("to_station_name", String.class));
-                order.setOrderDate(x.get("order_date", String.class));
-                order.setSequenceNo(x.get("sequence_no", String.class));
-                order.setStartTrainDatePage(x.get("start_train_date_page", String.class));
-                order.setTrainCodePage(x.get("train_code_page", String.class));
-                order.setTicketTotalPricePage(x.get("ticket_total_price_page", String.class));
-                order.setTicketTotalnum(x.get("ticket_totalnum", String.class));
-                order.setCoachNo(t.get("coach_no", String.class));
-                order.setSeatName(t.get("seat_name", String.class));
-                order.setSeatTypeName(t.get("seat_type_name", String.class));
-                order.setStrTicketPricePage(t.get("str_ticket_price_page", String.class));
-                order.setTicketStatusName(t.get("ticket_status_name", String.class));
-                order.setTicketTypeName(t.get("ticket_type_name", String.class));
-                orderList.add(order);
+        if (Objects.nonNull(json)) {
+            List<JSONObject> array = JSONUtil.toList(json.getJSONArray("OrderDTODataList"), JSONObject.class);
+            array.forEach(x -> {
+                List<JSONObject> tickets = JSONUtil.toList(x.getJSONArray("tickets"), JSONObject.class);
+                tickets.forEach(t -> {
+                    MyOrder order = new MyOrder();
+                    JSONObject passenger = t.get("passengerDTO", JSONObject.class);
+                    JSONObject stationTrain = t.get("stationTrainDTO", JSONObject.class);
+                    // 开始设置订单信息
+                    order.setArrayPassserNamePage(passenger.get("passenger_name", String.class));
+                    order.setFromStationNamePage(stationTrain.get("from_station_name", String.class));
+                    order.setToStationNamePage(stationTrain.get("to_station_name", String.class));
+                    order.setOrderDate(x.get("order_date", String.class));
+                    order.setSequenceNo(x.get("sequence_no", String.class));
+                    order.setStartTrainDatePage(x.get("start_train_date_page", String.class));
+                    order.setTrainCodePage(x.get("train_code_page", String.class));
+                    order.setTicketTotalPricePage(x.get("ticket_total_price_page", String.class));
+                    order.setTicketTotalnum(x.get("ticket_totalnum", String.class));
+                    order.setCoachNo(t.get("coach_no", String.class));
+                    order.setSeatName(t.get("seat_name", String.class));
+                    order.setSeatTypeName(t.get("seat_type_name", String.class));
+                    order.setStrTicketPricePage(t.get("str_ticket_price_page", String.class));
+                    order.setTicketStatusName(t.get("ticket_status_name", String.class));
+                    order.setTicketTypeName(t.get("ticket_type_name", String.class));
+                    orderList.add(order);
+                });
             });
-        });
+        }
         return orderList;
+    }
+
+    /**
+     * 设置未完成的订单信息
+     *
+     * @param json
+     * @return
+     */
+    public static MyOrder settingNoCompleteOrder(JSONObject json) {
+        MyOrder order = new MyOrder();
+        if (Objects.nonNull(json)) {
+            List<JSONObject> array = JSONUtil.toList(json.getJSONArray("orderDBList"), JSONObject.class);
+            array.forEach(x -> {
+                List<JSONObject> tickets = JSONUtil.toList(x.getJSONArray("tickets"), JSONObject.class);
+                tickets.forEach(t -> {
+                    JSONObject passenger = t.get("passengerDTO", JSONObject.class);
+                    JSONObject stationTrain = t.get("stationTrainDTO", JSONObject.class);
+                    // 开始设置订单信息
+                    order.setArrayPassserNamePage(passenger.get("passenger_name", String.class));
+                    order.setFromStationNamePage(stationTrain.get("from_station_name", String.class));
+                    order.setToStationNamePage(stationTrain.get("to_station_name", String.class));
+                    order.setOrderDate(x.get("order_date", String.class));
+                    order.setSequenceNo(x.get("sequence_no", String.class));
+                    order.setStartTrainDatePage(x.get("start_train_date_page", String.class));
+                    order.setTrainCodePage(x.get("train_code_page", String.class));
+                    order.setTicketTotalPricePage(x.get("ticket_total_price_page", String.class));
+                    order.setTicketTotalnum(x.get("ticket_totalnum", String.class));
+                    order.setCoachNo(t.get("coach_no", String.class));
+                    order.setSeatName(t.get("seat_name", String.class));
+                    order.setSeatTypeName(t.get("seat_type_name", String.class));
+                    order.setStrTicketPricePage(t.get("str_ticket_price_page", String.class));
+                    order.setTicketStatusName(t.get("ticket_status_name", String.class));
+                    order.setTicketTypeName(t.get("ticket_type_name", String.class));
+                    order.setStartTimePage(x.get("start_time_page", String.class));
+                    order.setArriveTimePage(x.get("arrive_time_page", String.class));
+                });
+            });
+        }
+        return order;
     }
 
 
@@ -886,7 +975,7 @@ public class HttpURL12306 {
      *
      * @param reCookieKeys 不需要携带的cookie-key
      */
-    public static String getCookieStr(String[] reCookieKeys) {
+    public String getCookieStr(String[] reCookieKeys) {
         StringJoiner sj = new StringJoiner(";");
         for (Map.Entry<String, String> cookie : COOKIE_CACHE_MAP.entrySet()) {
             boolean flag = false;
@@ -902,8 +991,8 @@ public class HttpURL12306 {
             }
         }
         // 以下两个cookie参数为必带参数
-        sj.add(String.format("%s=%s", "RAIL_EXPIRATION", RAIL_EXPIRATION));
-        sj.add(String.format("%s=%s", "RAIL_DEVICEID", RAIL_DEVICEID));
+        sj.add(String.format("%s=%s", "RAIL_EXPIRATION", config.getRAIL_EXPIRATION()));
+        sj.add(String.format("%s=%s", "RAIL_DEVICEID", config.getRAIL_DEVICEID()));
         // 暂时携带该cookie,后面换成动态获取
         sj.add(String.format("%s=%s", "BIGipServerpassport", BIGIPSERVERPASSPORT));
         return sj.toString();

@@ -112,9 +112,19 @@ public interface HttpURLConstant12306 {
     String DEL_PASSENGERS="https://kyfw.12306.cn/otn/passengers/delete";
 
     /**
+     * 新增乘车人: post
+     */
+    String ADD_PASSENGERS="https://kyfw.12306.cn/otn/passengers/add";
+
+    /**
      * 查询我的订单: post
      */
     String QUERY_MY_ORDER="https://kyfw.12306.cn/otn/queryOrder/queryMyOrder";
+
+    /**
+     * 查询未完成订单: post
+     */
+    String QUERY_MY_ORDER_NO_COMPLETE="https://kyfw.12306.cn/otn/queryOrder/queryMyOrderNoComplete";
 
     /**
      * 获取RAIL_EXPIRATION和RAIL_DEVICEID参数：get(algID:{1}、hashCode:{2}、timestamp:{3}当前时间毫秒数)

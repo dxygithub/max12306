@@ -86,4 +86,20 @@ public class MyOrder {
      * 车票类型
      */
     private String ticketTypeName;
+
+
+    /*********************************  未完成订单字段 *********************************/
+
+    /**
+     * 发车时间: time
+     */
+    private String startTimePage;
+
+    /**
+     * 到达时间: time
+     */
+    private String arriveTimePage;
+
+    /*********************************  未完成订单字段 *********************************/
+
 }

@@ -1,11 +1,12 @@
 package com.train.ticket.max12306.service.impl;
 
 import com.train.ticket.max12306.common.HttpURL12306;
-import com.train.ticket.max12306.common.QueryTicketPriceRequest;
-import com.train.ticket.max12306.common.QueryTicketRequest;
+import com.train.ticket.max12306.requestvo.QueryTicketPriceRequest;
+import com.train.ticket.max12306.requestvo.QueryTicketRequest;
 import com.train.ticket.max12306.entity.TicketInfo;
 import com.train.ticket.max12306.entity.TicketPrice;
 import com.train.ticket.max12306.service.TicketService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -22,11 +23,14 @@ import java.util.Optional;
 @Service
 public class TicketServiceImpl implements TicketService {
 
+    @Autowired
+    private HttpURL12306 url12306;
+
     @Override
     public List<TicketInfo> getTickets(QueryTicketRequest ticketRequest) {
         List<TicketInfo> ticketInfos = null;
         try {
-            ticketInfos = HttpURL12306.parseTicketInfo(ticketRequest);
+            ticketInfos = url12306.parseTicketInfo(ticketRequest);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -38,7 +42,7 @@ public class TicketServiceImpl implements TicketService {
     public TicketPrice getTicketPrice(QueryTicketPriceRequest ticketPriceRequest) {
         TicketPrice price=null;
         try {
-            price=HttpURL12306.parseTicketPrice(ticketPriceRequest);
+            price=url12306.parseTicketPrice(ticketPriceRequest);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,4 +1,4 @@
-package com.train.ticket.max12306.common;
+package com.train.ticket.max12306.requestvo;
 
 import lombok.Data;
 

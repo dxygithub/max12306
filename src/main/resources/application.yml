@@ -18,6 +18,3 @@ jasypt:
 logging:
   level:
     com.train.ticket.max12306.mapper: debug
-
-# 是否开启自动识别图片验证码
-autoCheck: true

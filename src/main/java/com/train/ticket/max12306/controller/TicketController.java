@@ -1,14 +1,13 @@
 package com.train.ticket.max12306.controller;
 
 import com.train.ticket.max12306.common.HttpURL12306;
-import com.train.ticket.max12306.common.QueryTicketPriceRequest;
-import com.train.ticket.max12306.common.QueryTicketRequest;
+import com.train.ticket.max12306.requestvo.QueryTicketPriceRequest;
+import com.train.ticket.max12306.requestvo.QueryTicketRequest;
 import com.train.ticket.max12306.common.RestResult;
 import com.train.ticket.max12306.entity.TicketInfo;
 import com.train.ticket.max12306.entity.TicketPrice;
 import com.train.ticket.max12306.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

@@ -2,8 +2,8 @@ package com.train.ticket.max12306;
 
 import com.train.ticket.max12306.common.HttpURL12306;
 import com.train.ticket.max12306.common.HttpURLConstant12306;
-import com.train.ticket.max12306.common.QueryTicketPriceRequest;
-import com.train.ticket.max12306.common.QueryTicketRequest;
+import com.train.ticket.max12306.requestvo.QueryTicketPriceRequest;
+import com.train.ticket.max12306.requestvo.QueryTicketRequest;
 import com.train.ticket.max12306.entity.StationInfo;
 import com.train.ticket.max12306.entity.TicketInfo;
 import com.train.ticket.max12306.entity.TicketPrice;
@@ -51,10 +51,13 @@ class Max12306ApplicationTests {
     @Autowired
     private StationInfoMapper stationInfoMapper;
 
+    @Autowired
+    private HttpURL12306 url12306;
+
     @Test
     void testStationInfo() {
         try {
-            List<StationInfo> list = HttpURL12306.parseStationInfo();
+            List<StationInfo> list = url12306.parseStationInfo();
             for (StationInfo item : list) {
                 LOGGER.info("车站名称:{}，编码:{}，全拼:{}，简拼:{}，车站序号:{}", item.getStationName(), item.getStationCode(), item.getStationSpell(), item.getStationLogogram(), item.getStationSort());
             }
@@ -66,7 +69,7 @@ class Max12306ApplicationTests {
     @Test
     void testTicketQuery() {
         try {
-            List<StationInfo> list = HttpURL12306.parseStationInfo();
+            List<StationInfo> list = url12306.parseStationInfo();
             for (StationInfo item : list) {
                 LOGGER.info("车站名称:{}，编码:{}，全拼:{}，简拼:{}，车站序号:{}", item.getStationName(), item.getStationCode(), item.getStationSpell(), item.getStationLogogram(), item.getStationSort());
             }
@@ -76,7 +79,7 @@ class Max12306ApplicationTests {
             request.setFromStationCode("SHH");
             request.setToStationCode("TYV");
             request.setTicketType(TicketType.TICKETS);
-            List<TicketInfo> ticketInfos = HttpURL12306.parseTicketInfo(request);
+            List<TicketInfo> ticketInfos = url12306.parseTicketInfo(request);
             List<TicketInfo> offStreamTrain = ticketInfos.stream().filter(x -> x.getRemark().equals("列车停运")).collect(Collectors.toList());
             ticketInfos.removeAll(offStreamTrain);
             ticketInfos.addAll(offStreamTrain);
@@ -90,7 +93,7 @@ class Max12306ApplicationTests {
                 priceRequest.setSeatTypes(x.getSeatType());
                 TicketPrice ticketPrice = null;
                 try {
-                    ticketPrice = HttpURL12306.parseTicketPrice(priceRequest);
+                    ticketPrice = url12306.parseTicketPrice(priceRequest);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

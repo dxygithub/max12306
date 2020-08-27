@@ -5,6 +5,9 @@ import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.common.*;
 import com.train.ticket.max12306.entity.MyOrder;
 import com.train.ticket.max12306.entity.PassengerInfo;
+import com.train.ticket.max12306.requestvo.InitSlidePassPort;
+import com.train.ticket.max12306.requestvo.PassengersVo;
+import com.train.ticket.max12306.requestvo.UserLoginRequest;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -17,6 +20,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -35,6 +39,9 @@ import java.util.StringJoiner;
 public class UserLoginServiceImpl implements UserLoginService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserLoginServiceImpl.class);
+
+    @Autowired
+    private HttpURL12306 url12306;
 
     /**
      * 验证码中心位置固定坐标
@@ -58,7 +65,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     public RestResult getImgCaptcha() {
         String[] resultArr = null;
         try {
-            String result = HttpURL12306.getImgCaptcha();
+            String result = url12306.getImgCaptcha();
             resultArr = result.split("--");
         } catch (Exception e) {
             e.printStackTrace();
@@ -76,7 +83,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     public RestResult initSlidePassport(InitSlidePassPort passPort) {
         if (Objects.nonNull(passPort)) {
             try {
-                String ifCheckSlidePasscodeToken = HttpURL12306.initSlidePassPort(passPort);
+                String ifCheckSlidePasscodeToken = url12306.initSlidePassPort(passPort);
                 if (StringUtils.equals("5", ifCheckSlidePasscodeToken)) {
                     LOGGER.info("======> 初始化滑块验证失败...");
                     return RestResult.SERVER_ERROR().message("初始化滑块验证失败").build();
@@ -109,7 +116,7 @@ public class UserLoginServiceImpl implements UserLoginService {
                 }
                 LOGGER.info("======> 开始手动识别验证码...");
                 // 手动识别验证码，坐标位置前端已经处理过，此处直接进行校验即可
-                resultCode = HttpURL12306.checkImgCapthcha(imgIndex, timer);
+                resultCode = url12306.checkImgCapthcha(imgIndex, timer);
             } else {
                 LOGGER.info("======> 开始自动识别验证码...");
                 try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
@@ -129,7 +136,7 @@ public class UserLoginServiceImpl implements UserLoginService {
                                 // 自动验证，返回验证码下标位置，需要使用固定坐标位置进行转换
                                 String[] autoCheckImgIndex = json.get("result", String[].class);
                                 String answer = capthchaXYMatching(autoCheckImgIndex);
-                                resultCode = HttpURL12306.checkImgCapthcha(answer, timer);
+                                resultCode = url12306.checkImgCapthcha(answer, timer);
                             }
                         }
                     }
@@ -156,7 +163,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     public RestResult userLogin(UserLoginRequest loginRequest) {
         if (Objects.nonNull(loginRequest)) {
             try {
-                String result = HttpURL12306.loginRequest(loginRequest);
+                String result = url12306.loginRequest(loginRequest);
                 if (!StringUtils.equals(result, "5")) {
                     return RestResult.SUCCESS().message("登录成功").data(result).build();
                 } else {
@@ -179,7 +186,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     public RestResult userPassportUamtk(String appId, String uamtk) {
         if (StringUtils.isNotBlank(appId)) {
             try {
-                String result = HttpURL12306.loginSuccessPassportUamtk(appId, uamtk);
+                String result = url12306.loginSuccessPassportUamtk(appId, uamtk);
                 if (StringUtils.isBlank(result)) {
                     return RestResult.SUCCESS().message("认证失败").data("5").build();
                 }
@@ -201,7 +208,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     public RestResult getUserName(String tk) {
         if (StringUtils.isNotBlank(tk)) {
             try {
-                String result = HttpURL12306.getUserName(tk);
+                String result = url12306.getUserName(tk);
                 if (!StringUtils.equals(result, "5")) {
                     return RestResult.SUCCESS().message("获取用户名成功").data(result).build();
                 } else {
@@ -222,7 +229,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     @Override
     public RestResult getPassengers() {
         try {
-            List<PassengerInfo> passengerInfos = HttpURL12306.getPassengersInfo();
+            List<PassengerInfo> passengerInfos = url12306.getPassengersInfo();
             return RestResult.SUCCESS().data(passengerInfos).build();
         } catch (Exception e) {
             e.printStackTrace();
@@ -236,15 +243,31 @@ public class UserLoginServiceImpl implements UserLoginService {
      * @return
      */
     @Override
-    public RestResult getOrderInfo() {
+    public RestResult getOrderInfo(String queryStartDate, String queryEndDate, String queryWhere) {
 
         try {
-            List<MyOrder> orderList = HttpURL12306.getOrderInfo();
+            List<MyOrder> orderList = url12306.getOrderInfo(queryStartDate, queryEndDate, queryWhere);
             return RestResult.SUCCESS().data(orderList).build();
         } catch (Exception e) {
             e.printStackTrace();
         }
         return RestResult.ERROR_PARAMS().build();
+    }
+
+    /**
+     * 获取未完成的订单
+     *
+     * @return
+     */
+    @Override
+    public RestResult getOrderNoComplete() {
+        try {
+            MyOrder order = url12306.getOrderNoComplete();
+            return RestResult.SUCCESS().data(order).build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return RestResult.SERVER_ERROR().build();
     }
 
     /**
@@ -257,7 +280,26 @@ public class UserLoginServiceImpl implements UserLoginService {
     public RestResult delPassenger(PassengersVo passengersVo) {
         if (Objects.nonNull(passengersVo)) {
             try {
-                String result = HttpURL12306.delPassenger(passengersVo);
+                String result = url12306.delPassenger(passengersVo);
+                return RestResult.SUCCESS().data(result).build();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return RestResult.ERROR_PARAMS().message("参数为空").build();
+    }
+
+    /**
+     * 新增乘车人
+     *
+     * @param passengersVo
+     * @return
+     */
+    @Override
+    public RestResult addPassengers(PassengersVo passengersVo) {
+        if (Objects.nonNull(passengersVo)) {
+            try {
+                String result = url12306.addPassenger(passengersVo);
                 return RestResult.SUCCESS().data(result).build();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -274,7 +316,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     @Override
     public RestResult loginOut() {
         try {
-            HttpURL12306.loginOut();
+            url12306.loginOut();
         } catch (Exception e) {
             e.printStackTrace();
         }

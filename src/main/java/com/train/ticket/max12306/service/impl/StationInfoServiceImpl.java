@@ -28,6 +28,9 @@ public class StationInfoServiceImpl implements StationInfoService {
     @Autowired
     private StationInfoMapper stationInfoMapper;
 
+    @Autowired
+    private HttpURL12306 url12306;
+
     /**
      * 获取车站总记录数
      *
@@ -72,7 +75,7 @@ public class StationInfoServiceImpl implements StationInfoService {
     public List<StationInfo> directGetStationInfo() {
         List<StationInfo> stationInfos = null;
         try {
-            stationInfos = HttpURL12306.parseStationInfo();
+            stationInfos = url12306.parseStationInfo();
             if (!CollectionUtils.isEmpty(stationInfos)) {
                 // 直接请求12306获取到的车站信息可能会有重复数据，需要去重排序
                 stationInfos = stationInfos.stream().filter(HttpURL12306.distinctByKey(StationInfo::getStationCode)).sorted(Comparator.comparing(StationInfo::getStationSort)).collect(Collectors.toList());
