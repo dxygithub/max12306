@@ -1,5 +1,6 @@
 package com.train.ticket.max12306.entity;
 
+import com.train.ticket.max12306.enumeration.SeatType;
 import lombok.Data;
 
 /**
@@ -83,4 +84,9 @@ public class PassengerInfo {
     private String sexName;
 
     private String isUserSelf;
+
+    /**
+     * 座位类型: 下单时用到
+     */
+    private SeatType seatType;
 }

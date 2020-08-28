@@ -63,27 +63,27 @@ public class HttpURL12306 {
     /**
      * 车站信息Map
      */
-    public static final Map<String, String> STATION_MAP = new HashMap<>();
+    public static final Map<String, String> STATION_MAP = new HashMap<>(16);
 
     /**
      * 图片验证码Map
      */
-    public static final Map<String, String> IMG_CAPTHCHA_MAP = new HashMap<>();
+    public static final Map<String, String> IMG_CAPTHCHA_MAP = new HashMap<>(16);
 
     /**
      * 12306 - Cookie缓存
      */
-    public static final Map<String, String> COOKIE_CACHE_MAP = new HashMap<>();
+    public static final Map<String, String> COOKIE_CACHE_MAP = new HashMap<>(16);
 
     /**
      * 本地cookie实例
      */
-    private static CookieStore cookieStore;
+    public static CookieStore cookieStore;
 
     /**
      * HttpClientContext上下文
      */
-    private static HttpClientContext context;
+    public static HttpClientContext context;
 
     /**
      * 解析车站信息

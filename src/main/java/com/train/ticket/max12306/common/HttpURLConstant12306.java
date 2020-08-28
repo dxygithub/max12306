@@ -127,6 +127,41 @@ public interface HttpURLConstant12306 {
     String QUERY_MY_ORDER_NO_COMPLETE="https://kyfw.12306.cn/otn/queryOrder/queryMyOrderNoComplete";
 
     /**
+     * 检查用户是否已登录: post: _json_att:
+     */
+    String CHECK_USER="https://kyfw.12306.cn/otn/login/checkUser";
+
+    /**
+     * 提交坐席订单: post
+     */
+    String SUBMIT_ORDER_REQUEST="https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest";
+
+    /**
+     * 初始化订单token: post
+     */
+    String INIT_DC="https://kyfw.12306.cn/otn/confirmPassenger/initDc";
+
+    /**
+     * 检查订单信息: post
+     */
+    String CHECK_ORDER_INFO="https://kyfw.12306.cn/otn/confirmPassenger/checkOrderInfo";
+
+    /**
+     * 检查排队人数和余票: post
+     */
+    String GET_QUEUE_COUNT="https://kyfw.12306.cn/otn/confirmPassenger/getQueueCount";
+
+    /**
+     * 确认订单提交: post
+     */
+    String CONFIRM_SINGLE_FOR_QUEUE="https://kyfw.12306.cn/otn/confirmPassenger/confirmSingleForQueue";
+
+    /**
+     * 订单等待处理: get
+     */
+    String ORDER_WAIT="https://kyfw.12306.cn/otn/confirmPassenger/queryOrderWaitTime?random={1}&tourFlag=dc&_json_att=&REPEAT_SUBMIT_TOKEN={2}";
+
+    /**
      * 获取RAIL_EXPIRATION和RAIL_DEVICEID参数：get(algID:{1}、hashCode:{2}、timestamp:{3}当前时间毫秒数)
      */
     String GET_RAIL_URL =   "https://kyfw.12306.cn/otn/HttpZF/logdevice?" +
