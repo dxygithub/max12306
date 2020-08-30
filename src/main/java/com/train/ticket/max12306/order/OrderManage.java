@@ -22,7 +22,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.net.URLDecoder;
 import java.text.ParseException;
@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * @Date 2020/8/27 14:59
  * @Version 1.0
  */
-@Component
+@Service
 public class OrderManage {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderManage.class);
@@ -50,6 +50,11 @@ public class OrderManage {
      * 小黑屋: 车次号 -> 加入时间
      */
     public static final Map<String, Long> SMALL_DARK_ROOM = new HashMap<>(16);
+
+    /**
+     * 订单token参数
+     */
+    public static final Map<String, String> TOKEN_MAP = new HashMap<>(16);
 
     @Autowired
     private ConfigFileUtil config;
@@ -76,7 +81,7 @@ public class OrderManage {
         formPail.add(new BasicNameValuePair("train_date", trainDate));
         formPail.add(new BasicNameValuePair("back_train_date", backTrainDate));
         formPail.add(new BasicNameValuePair("tour_flag", "dc"));
-        formPail.add(new BasicNameValuePair("purpose_codes", "purpose_codes"));
+        formPail.add(new BasicNameValuePair("purpose_codes", "ADULT"));
         formPail.add(new BasicNameValuePair("query_from_station_name", HttpURL12306.STATION_MAP.get(queryFromStationCode)));
         formPail.add(new BasicNameValuePair("query_to_station_name", HttpURL12306.STATION_MAP.get(queryToStationCode)));
         formPail.add(new BasicNameValuePair("undefined", ""));
@@ -97,6 +102,7 @@ public class OrderManage {
                         LOGGER.info("======> 预定车票失败，原因: {}...", message);
                     }
                 } else {
+                    LOGGER.info("======> 接口返回结果为空: 302...");
                     return OrderStatus.EMPTY;
                 }
             }
@@ -112,7 +118,7 @@ public class OrderManage {
      *
      * @return token
      */
-    public String getSubmitToken() throws Exception {
+    public Map<String, String> getSubmitToken() throws Exception {
         List<NameValuePair> formPail = new ArrayList<>();
         formPail.add(new BasicNameValuePair("_json_att", ""));
         HttpPost post = HttpURL12306.httpPostBuild(HttpURLConstant12306.INIT_DC, formPail, url12306.getCookieStr(null));
@@ -124,31 +130,70 @@ public class OrderManage {
                 // 释放资源
                 EntityUtils.consume(entity);
                 if (StringUtils.isNotBlank(result)) {
-                    String token = "";
-                    Pattern p = Pattern.compile("globalRepeatSubmitToken \\= '(.*?)';");
-                    Matcher m = p.matcher(result);
-                    while (m.find()) {
-                        token = m.group(1);
-                    }
-                    Pattern p1 = Pattern.compile("'key_check_isChange':'(.*?)',");
+                    String param = "";
+
+                    Pattern p1 = Pattern.compile("globalRepeatSubmitToken \\= '(.*?)';");
                     Matcher m1 = p1.matcher(result);
                     while (m1.find()) {
-                        token += "," + m1.group(1);
+                        param = m1.group(1);
                     }
-                    Pattern p2 = Pattern.compile("'leftTicketStr':'(.*?)',");
+                    if (StringUtils.isNotBlank(param)) {
+                        TOKEN_MAP.put("submitToken", param);
+                    }
+
+                    param = "";
+                    // 获取提交订单时的滑块passCode -> 0: 不需要滑块验证 1: 需要滑块验证
+                    Pattern p2 = Pattern.compile("if_check_slide_passcode\\='(.*?)';");
                     Matcher m2 = p2.matcher(result);
                     while (m2.find()) {
-                        token += "," + m2.group(1);
+                        param = m2.group(1);
                     }
-                    if (StringUtils.isNotBlank(token)) {
-                        LOGGER.info("======> 订单token获取成功...");
-                        return token;
+                    if (StringUtils.isNotBlank(param)) {
+                        TOKEN_MAP.put("ifCheckSlidePasscode", param);
                     }
-                    LOGGER.info("======> 订单token获取失败...");
+
+                    param = "";
+                    // 获取提交订单时的滑块token
+                    Pattern p3 = Pattern.compile("if_check_slide_passcode_token\\='(.*?)';");
+                    Matcher m3 = p3.matcher(result);
+                    while (m3.find()) {
+                        param = m3.group(1);
+                    }
+                    if (StringUtils.isNotBlank(param)) {
+                        TOKEN_MAP.put("ifCheckSlidePasscodeToken", param);
+                    }
+
+                    param = "";
+                    Pattern p4 = Pattern.compile("'key_check_isChange':'(.*?)',");
+                    Matcher m4 = p4.matcher(result);
+                    while (m4.find()) {
+                        param = m4.group(1);
+                    }
+                    if (StringUtils.isNotBlank(param)) {
+                        TOKEN_MAP.put("keyCheckIsChange", param);
+                    }
+
+                    param = "";
+                    Pattern p5 = Pattern.compile("'leftTicketStr':'(.*?)',");
+                    Matcher m5 = p5.matcher(result);
+                    while (m5.find()) {
+                        param = m5.group(1);
+                    }
+                    if (StringUtils.isNotBlank(param)) {
+                        TOKEN_MAP.put("leftTicketStr", param);
+                    }
+
+                    if (!TOKEN_MAP.isEmpty()) {
+                        LOGGER.info("======> 订单token参数获取成功 -> {}...", JSONUtil.toJsonStr(TOKEN_MAP));
+                        return TOKEN_MAP;
+                    }
+                    LOGGER.info("======> 订单token参数获取失败...");
+                } else {
+                    LOGGER.info("======> 接口返回结果为空: 302...");
                 }
             }
         }
-        return "";
+        return null;
     }
 
     // 获取乘车人和席位信息->提交订单->检查是否需要验证码或者滑块验证
@@ -161,7 +206,7 @@ public class OrderManage {
      * @return ISPassCode
      * @throws Exception
      */
-    public ISPassCode startSubmitOrder(List<PassengerInfo> passengerInfos, String submitToken) throws Exception {
+    public ISPassCode startSubmitOrder(List<PassengerInfo> passengerInfos, String submitToken, String sessionId, String sig) throws Exception {
         StringJoiner passengerTicketStr = new StringJoiner(",");
         StringJoiner oldPassengerStr = new StringJoiner(",");
         passengerInfos.forEach(passengerInfo -> {
@@ -196,8 +241,8 @@ public class OrderManage {
         formPail.add(new BasicNameValuePair("tour_flag", "dc"));
         formPail.add(new BasicNameValuePair("randCode", ""));
         formPail.add(new BasicNameValuePair("whatsSelect", "1"));
-        formPail.add(new BasicNameValuePair("sessionId", ""));
-        formPail.add(new BasicNameValuePair("sig", ""));
+        formPail.add(new BasicNameValuePair("sessionId", StringUtils.isBlank(sessionId) ? "" : sessionId));
+        formPail.add(new BasicNameValuePair("sig", StringUtils.isBlank(sig) ? "" : sig));
         formPail.add(new BasicNameValuePair("scene", "nc_login"));
         formPail.add(new BasicNameValuePair("_json_att", ""));
         formPail.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", submitToken));
@@ -215,25 +260,33 @@ public class OrderManage {
                     if (SUCCESS == json.get("httpstatus", Integer.class) && json.get("status", Boolean.class)) {
                         JSONObject data = json.get("data", JSONObject.class);
                         if (data.get("submitStatus", Boolean.class)) {
-                            LOGGER.info("======> 订单提交成功...");
                             // 是否需要验证码: Y 需要 / N 不需要
                             String ifShowPassCode = data.get("ifShowPassCode", String.class);
-                            // 安全期时间: 单位 -> 秒
+                            // 安全期时间: 单位 -> 毫秒
                             String ifShowPassCodeTime = data.get("ifShowPassCodeTime", String.class);
                             if (StringUtils.equals("Y", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交需要验证码...");
-                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/s...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                LOGGER.info("======> 订单检查并提交成功...");
+                                // 进入安全等待期
+                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.YES;
                             } else if (StringUtils.equals("N", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交不需要验证码...");
-                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/s...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                LOGGER.info("======> 订单检查并提交成功...");
+                                // 进入安全等待期
+                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
                             } else if (StringUtils.equals("X", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交预定失败...");
                                 return ISPassCode.ERR;
                             } else {
-                                LOGGER.info("======> 本次订单提交不需要验证码...");
-                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/s...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                // LOGGER.info("======> 本次订单提交不需要验证码...");
+                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                LOGGER.info("======> 订单检查并提交成功...");
+                                // 进入安全等待期
+                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
                             }
                         } else {
@@ -242,6 +295,8 @@ public class OrderManage {
                     } else {
                         LOGGER.info("======> 本次订单提交预定失败，原因: {}...", message);
                     }
+                } else {
+                    LOGGER.info("======> 接口返回结果为空: 302...");
                 }
             }
         }
@@ -253,11 +308,10 @@ public class OrderManage {
     /**
      * 检查当前车票排队人数和余票信息
      *
-     * @param submitToken
      * @param ticketInfo
      * @return
      */
-    public OrderStatus getQueueCount(String submitToken, String leftTicket, TicketInfo ticketInfo, SeatType seatType) throws Exception {
+    public OrderStatus getQueueCount(TicketInfo ticketInfo, SeatType seatType) throws Exception {
         List<NameValuePair> formPail = new ArrayList<>();
         formPail.add(new BasicNameValuePair("train_date", getGMT(ticketInfo.getStartDate())));
         formPail.add(new BasicNameValuePair("train_no", ticketInfo.getTrainNo()));
@@ -265,11 +319,11 @@ public class OrderManage {
         formPail.add(new BasicNameValuePair("seatType", seatType.getValue()));
         formPail.add(new BasicNameValuePair("fromStationTelecode", HttpURL12306.STATION_MAP.get(ticketInfo.getFromStationCode())));
         formPail.add(new BasicNameValuePair("toStationTelecode", HttpURL12306.STATION_MAP.get(ticketInfo.getToStationCode())));
-        formPail.add(new BasicNameValuePair("leftTicket", leftTicket));
+        formPail.add(new BasicNameValuePair("leftTicket", TOKEN_MAP.get("leftTicketStr")));
         formPail.add(new BasicNameValuePair("purpose_codes", "00"));
         formPail.add(new BasicNameValuePair("train_location", ticketInfo.getTrainLocation()));
         formPail.add(new BasicNameValuePair("_json_att", ""));
-        formPail.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", submitToken));
+        formPail.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", TOKEN_MAP.get("submitToken")));
         HttpPost post = HttpURL12306.httpPostBuild(HttpURLConstant12306.GET_QUEUE_COUNT, formPail, url12306.getCookieStr(null));
         try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
             try (CloseableHttpResponse response = client.execute(post, HttpURL12306.context)) {
@@ -280,17 +334,21 @@ public class OrderManage {
                 if (StringUtils.isNotBlank(result)) {
                     JSONObject json = JSONUtil.parseObj(result);
                     if (SUCCESS == json.get("httpstatus", Integer.class) && json.get("status", Boolean.class)) {
-                        LOGGER.info("======> 查询当前车票排队和余票信息成功...");
                         JSONObject data = json.get("data", JSONObject.class);
-                        if (data.get("op_2", Boolean.class)) {
-                            return OrderStatus.SUCCESS;
-                        } else {
-                            return OrderStatus.FAIL;
+                        // 余票
+                        String ticket = data.get("ticket", String.class);
+                        String count = data.get("countT", String.class);
+                        if (StringUtils.isNotBlank(count) && StringUtils.equals("0", count)) {
+                            count = data.get("count", String.class);
                         }
+                        LOGGER.info("======> 排队成功: 你排在第{}位，目前余票还剩余: {}张...", count, ticket);
+                        return OrderStatus.SUCCESS;
                     } else {
                         LOGGER.info("======> 查询当前车票排队和余票信息失败...");
                         return OrderStatus.FAIL;
                     }
+                } else {
+                    LOGGER.info("======> 接口返回结果为空: 302...");
                 }
             }
         }
@@ -302,12 +360,10 @@ public class OrderManage {
     /**
      * 确认订单提交
      *
-     * @param submitToken      订单token
-     * @param leftTicket       车票加密串
-     * @param keyCheckIsChange 校验key
-     * @param passengerInfos   乘车人
+     * @param trainLocation  列车标识码
+     * @param passengerInfos 乘车人
      */
-    public void confirmSingleForQueue(String submitToken, String leftTicket, String keyCheckIsChange, String trainLocation, List<PassengerInfo> passengerInfos) throws Exception {
+    public OrderStatus confirmSingleForQueue(String trainLocation, List<PassengerInfo> passengerInfos) throws Exception {
         StringJoiner passengerTicketStr = new StringJoiner(",");
         StringJoiner oldPassengerStr = new StringJoiner(",");
         passengerInfos.forEach(passengerInfo -> {
@@ -338,15 +394,16 @@ public class OrderManage {
         formPail.add(new BasicNameValuePair("oldPassengerStr", afterOldPassengerStr));
         formPail.add(new BasicNameValuePair("randCode", ""));
         formPail.add(new BasicNameValuePair("purpose_codes", "00"));
-        formPail.add(new BasicNameValuePair("key_check_isChange", keyCheckIsChange));
-        formPail.add(new BasicNameValuePair("leftTicketStr", leftTicket));
+        formPail.add(new BasicNameValuePair("key_check_isChange", TOKEN_MAP.get("keyCheckIsChange")));
+        formPail.add(new BasicNameValuePair("leftTicketStr", TOKEN_MAP.get("leftTicketStr")));
         formPail.add(new BasicNameValuePair("train_location", trainLocation));
         formPail.add(new BasicNameValuePair("choose_seats", ""));
         formPail.add(new BasicNameValuePair("seatDetailType", "000"));
         formPail.add(new BasicNameValuePair("whatsSelect", "1"));
+        formPail.add(new BasicNameValuePair("roomType", "00"));
         formPail.add(new BasicNameValuePair("dwAll", "N"));
         formPail.add(new BasicNameValuePair("_json_att", ""));
-        formPail.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", submitToken));
+        formPail.add(new BasicNameValuePair("REPEAT_SUBMIT_TOKEN", TOKEN_MAP.get("submitToken")));
 
         HttpPost post = HttpURL12306.httpPostBuild(HttpURLConstant12306.CONFIRM_SINGLE_FOR_QUEUE, formPail, url12306.getCookieStr(null));
         try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
@@ -362,16 +419,22 @@ public class OrderManage {
                         JSONObject data = json.get("data", JSONObject.class);
                         if (data.get("submitStatus", Boolean.class)) {
                             LOGGER.info("======> 确认订单提交成功...");
+                            return OrderStatus.SUCCESS;
                         } else {
                             String errMsg = data.get("errMsg", String.class);
                             LOGGER.info("======> 确认订单提交失败，原因: {}...", errMsg);
+                            return OrderStatus.FAIL;
                         }
                     } else {
                         LOGGER.info("======> 确认订单提交失败，原因: {}...", message);
+                        return OrderStatus.FAIL;
                     }
+                } else {
+                    LOGGER.info("======> 接口返回结果为空: 302...");
                 }
             }
         }
+        return OrderStatus.ERROR;
     }
 
     // 进入订单等待
@@ -379,10 +442,9 @@ public class OrderManage {
     /**
      * 进入订单等待处理
      *
-     * @param submitToken 订单token
      * @return 订单号
      */
-    public String orderWait(String submitToken) throws Exception {
+    public String orderWait() throws Exception {
         String sequenceNo = "";
         Integer waitTime = 0;
         Integer waitCount = 0;
@@ -394,7 +456,7 @@ public class OrderManage {
                 HttpGet get = HttpURL12306.httpGetBuild(
                         HttpURLConstant12306.ORDER_WAIT.
                                 replace("{1}", String.valueOf(System.currentTimeMillis())).
-                                replace("{2}", submitToken), url12306.getCookieStr(null));
+                                replace("{2}", TOKEN_MAP.get("submitToken")), url12306.getCookieStr(null));
                 try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
                     try (CloseableHttpResponse response = client.execute(get, HttpURL12306.context)) {
                         HttpEntity entity = response.getEntity();
@@ -408,31 +470,35 @@ public class OrderManage {
                                 waitTime = StringUtils.isBlank(data.get("waitTime", String.class)) ? 0 : Integer.parseInt(data.get("waitTime", String.class));
                                 waitCount = StringUtils.isBlank(data.get("waitCount", String.class)) ? 0 : Integer.parseInt(data.get("waitCount", String.class));
                                 sequenceNo = data.get("orderId", String.class);
-                                LOGGER.info("======> 目前排队人数: {} -> 排队等待时间预计还剩: {}/ms...", waitCount, waitTime);
+                                LOGGER.info("======> 目前排队等待人数: {} -> 排队等待时间预计还剩: {}/ms...", waitCount, waitTime);
                                 message = data.get("msg", String.class);
                                 if (StringUtils.isNotBlank(message)) {
                                     LOGGER.info("======> 订单异常，处理结果: {}...", message);
                                     break;
                                 }
-                                // 休眠3秒后继续获取订单等待信息，最高请求次数20次，超过20次视为订单失败
+                                // 休眠1秒后继续获取订单等待信息，最高请求次数20次，超过20次视为订单失败
                                 sleepCount++;
-                                Thread.sleep(3000L);
+                                Thread.sleep(1000L);
+                            } else {
+                                LOGGER.info("======> 订单等待失败，处理结果: {}...", json.get("messages", String.class));
                             }
+                        } else {
+                            LOGGER.info("======> 接口返回结果为空: 302...");
                         }
                     }
                 }
-            }else {
+            } else {
                 // 订单失败
+                LOGGER.info("======> 订单等待时间超时，处理失败...");
+                break;
             }
         }
         return sequenceNo;
     }
 
-    // 获取订单号 -> 订票成功
-
 
     /**
-     * 获取标准时间字符串
+     * 获取中国标准时间
      *
      * @param date
      * @return
@@ -455,10 +521,5 @@ public class OrderManage {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public static void main(String[] args) {
-        OrderManage orderManage = new OrderManage();
-        System.out.println(orderManage.getGMT("2020-08-28"));
     }
 }

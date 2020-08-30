@@ -13,6 +13,10 @@ public enum ISPassCode {
 
     YES(1),
     ERR(2),
+    /**
+     * 滑块验证
+     */
+    IS_SLIDE(3),
     NO(0);
 
     private int value;

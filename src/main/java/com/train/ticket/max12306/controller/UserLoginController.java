@@ -6,9 +6,9 @@ import com.train.ticket.max12306.requestvo.PassengersVo;
 import com.train.ticket.max12306.requestvo.UserLoginRequest;
 import com.train.ticket.max12306.service.UserLoginService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 /**
  * @ClassName UserLoginController
@@ -43,7 +43,7 @@ public class UserLoginController {
      * @return
      */
     @PostMapping("/max/initSlidePassport")
-    public RestResult initSlidePassport(InitSlidePassPort passPort) {
+    public RestResult initSlidePassport(@RequestBody InitSlidePassPort passPort) {
         return userLoginService.initSlidePassport(passPort);
     }
 
@@ -54,19 +54,18 @@ public class UserLoginController {
      * @return
      */
     @PostMapping("/max/userLogin")
-    public RestResult userLogin(UserLoginRequest loginRequest) {
+    public RestResult userLogin(@RequestBody UserLoginRequest loginRequest) {
         return userLoginService.userLogin(loginRequest);
     }
 
     /**
      * 用户认证
      *
-     * @param appId
      * @return
      */
     @PostMapping("/max/passPortUamtk")
-    public RestResult passPortUamtk(String appId, String uamtk) {
-        return userLoginService.userPassportUamtk(appId, uamtk);
+    public RestResult passPortUamtk(@RequestBody Map<String,String> params) {
+        return userLoginService.userPassportUamtk(params.get("appId"), params.get("uamtk"));
     }
 
     /**
@@ -75,8 +74,8 @@ public class UserLoginController {
      * @param tk
      * @return
      */
-    @PostMapping("/max/getUserName")
-    public RestResult getUserName(String tk) {
+    @GetMapping("/max/getUserName")
+    public RestResult getUserName(@RequestParam("tk") String tk) {
         return userLoginService.getUserName(tk);
     }
 
@@ -116,7 +115,7 @@ public class UserLoginController {
      * @return
      */
     @PostMapping("/max/delPassenger")
-    public RestResult delPassenger(PassengersVo passengersVo) {
+    public RestResult delPassenger(@RequestBody PassengersVo passengersVo) {
         return userLoginService.delPassenger(passengersVo);
     }
 
@@ -126,7 +125,7 @@ public class UserLoginController {
      * @return
      */
     @PostMapping("/max/addPassenger")
-    public RestResult addPassenger(PassengersVo passengersVo){
+    public RestResult addPassenger(@RequestBody PassengersVo passengersVo){
         return userLoginService.addPassengers(passengersVo);
     }
 

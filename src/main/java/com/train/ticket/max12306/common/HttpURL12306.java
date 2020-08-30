@@ -461,6 +461,38 @@ public class HttpURL12306 {
         }
     }
 
+    /**
+     * 检查用户是否已登录
+     *
+     * @return Y:已登录 N: 未登录
+     */
+    public String checkUser() throws Exception {
+        try (CloseableHttpClient client = httpClientBuild()) {
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("_json_att", ""));
+            HttpPost post = httpPostBuild(HttpURLConstant12306.CHECK_USER, formPail, getCookieStr(null));
+            try (CloseableHttpResponse response = client.execute(post, context)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if (SUCCESS == json.get("httpstatus", Integer.class) && json.get("status", Boolean.class)) {
+                        JSONObject data = json.get("data", JSONObject.class);
+                        if (data.get("flag", Boolean.class)) {
+                            return "Y";
+                        }
+                        return "N";
+                    }
+                } else {
+                    LOGGER.info("======> 接口返回结果为空: 302...");
+                }
+            }
+        }
+        return "N";
+    }
+
 
     /**
      * 获取乘车人信息

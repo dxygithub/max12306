@@ -46,14 +46,14 @@ public class UserLoginServiceImpl implements UserLoginService {
     /**
      * 验证码中心位置固定坐标
      **/
-    private String yzm1Point = "35,72";
-    private String yzm2Point = "111,72";
-    private String yzm3Point = "181,72";
-    private String yzm4Point = "250,72";
-    private String yzm5Point = "35,148";
-    private String yzm6Point = "111,148";
-    private String yzm7Point = "181,148";
-    private String yzm8Point = "250,148";
+    private static final String YZM1_POS = "35,72";
+    private static final String YZM2_POS = "111,72";
+    private static final String YZM3_POS = "181,72";
+    private static final String YZM4_POS = "250,72";
+    private static final String YZM5_POS = "35,148";
+    private static final String YZM6_POS = "111,148";
+    private static final String YZM7_POS = "181,148";
+    private static final String YZM8_POS = "250,148";
 
 
     /**
@@ -119,28 +119,9 @@ public class UserLoginServiceImpl implements UserLoginService {
                 resultCode = url12306.checkImgCapthcha(imgIndex, timer);
             } else {
                 LOGGER.info("======> 开始自动识别验证码...");
-                try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
-                    HttpPost httpPost = new HttpPost(HttpURLConstant12306.OCR_AUTO_CHECK);
-                    List<NameValuePair> formPail = new ArrayList<>();
-                    formPail.add(new BasicNameValuePair("img", img));
-                    UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(formPail, "UTF-8");
-                    httpPost.setEntity(formEntity);
-                    try (CloseableHttpResponse response = client.execute(httpPost)) {
-                        HttpEntity entity = response.getEntity();
-                        String result = EntityUtils.toString(entity);
-                        // 释放资源
-                        EntityUtils.consume(entity);
-                        if (StringUtils.isNotBlank(result)) {
-                            JSONObject json = JSONUtil.parseObj(result);
-                            if ("200".equals(json.get("code", String.class))) {
-                                // 自动验证，返回验证码下标位置，需要使用固定坐标位置进行转换
-                                String[] autoCheckImgIndex = json.get("result", String[].class);
-                                String answer = capthchaXYMatching(autoCheckImgIndex);
-                                resultCode = url12306.checkImgCapthcha(answer, timer);
-                            }
-                        }
-                    }
-                }
+                String[] autoCheckImgIndex = autoCheckImgCaptcha(img);
+                String answer = capthchaXYMatching(autoCheckImgIndex);
+                resultCode = url12306.checkImgCapthcha(answer, timer);
             }
             if (resultCode.equals("4")) {
                 return RestResult.SUCCESS().data("4").message("验证码校验成功").build();
@@ -324,39 +305,70 @@ public class UserLoginServiceImpl implements UserLoginService {
     }
 
     /**
+     * 自动识别图片验证码
+     *
+     * @param img 验证码
+     * @return
+     */
+    public static String[] autoCheckImgCaptcha(String img) throws Exception {
+        try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
+            HttpPost httpPost = new HttpPost(HttpURLConstant12306.OCR_AUTO_CHECK);
+            List<NameValuePair> formPail = new ArrayList<>();
+            formPail.add(new BasicNameValuePair("img", img));
+            UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(formPail, "UTF-8");
+            httpPost.setEntity(formEntity);
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    if ("200".equals(json.get("code", String.class))) {
+                        // 自动验证，返回验证码下标位置，需要使用固定坐标位置进行转换
+                        String[] autoCheckImgIndex = json.get("result", String[].class);
+                        return autoCheckImgIndex;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 验证码坐标匹配
      *
      * @param imgIndexArr
      * @return
      */
-    private String capthchaXYMatching(String[] imgIndexArr) {
+    public static String capthchaXYMatching(String[] imgIndexArr) {
         StringJoiner answer = new StringJoiner(",");
         if (imgIndexArr != null && imgIndexArr.length > 0) {
             for (String index : imgIndexArr) {
                 switch (index) {
                     case "1":
-                        answer.add(this.yzm1Point);
+                        answer.add(YZM1_POS);
                         break;
                     case "2":
-                        answer.add(this.yzm2Point);
+                        answer.add(YZM2_POS);
                         break;
                     case "3":
-                        answer.add(this.yzm3Point);
+                        answer.add(YZM3_POS);
                         break;
                     case "4":
-                        answer.add(this.yzm4Point);
+                        answer.add(YZM4_POS);
                         break;
                     case "5":
-                        answer.add(this.yzm5Point);
+                        answer.add(YZM5_POS);
                         break;
                     case "6":
-                        answer.add(this.yzm6Point);
+                        answer.add(YZM6_POS);
                         break;
                     case "7":
-                        answer.add(this.yzm7Point);
+                        answer.add(YZM7_POS);
                         break;
                     case "8":
-                        answer.add(this.yzm8Point);
+                        answer.add(YZM8_POS);
                         break;
                     default:
                         break;
