@@ -243,8 +243,8 @@ public class UserLoginServiceImpl implements UserLoginService {
     @Override
     public RestResult getOrderNoComplete() {
         try {
-            MyOrder order = url12306.getOrderNoComplete();
-            return RestResult.SUCCESS().data(order).build();
+            List<MyOrder> orderList = url12306.getOrderNoComplete();
+            return RestResult.SUCCESS().data(orderList).build();
         } catch (Exception e) {
             e.printStackTrace();
         }

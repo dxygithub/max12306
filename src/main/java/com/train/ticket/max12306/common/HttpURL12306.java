@@ -336,7 +336,7 @@ public class HttpURL12306 {
      */
     public String loginRequest(UserLoginRequest loginRequest) throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
-            HttpGet loginGet = httpGetBuild(HttpURLConstant12306.LOGIN_INIT, getCookieStr(null));
+            /*HttpGet loginGet = httpGetBuild(HttpURLConstant12306.LOGIN_INIT, getCookieStr(null));
             try (CloseableHttpResponse loginResponse = client.execute(loginGet, context)) {
                 // 此处只为获取初始化登录前的cookie
                 cacheCookie(cookieStore.getCookies());
@@ -345,7 +345,7 @@ public class HttpURL12306 {
             try (CloseableHttpResponse loginResponse = client.execute(loginGet, context)) {
                 // 此处只为获取初始化登录前的cookie
                 cacheCookie(cookieStore.getCookies());
-            }
+            }*/
 
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("sessionId", loginRequest.getSessionId()));
@@ -357,6 +357,8 @@ public class HttpURL12306 {
             formPail.add(new BasicNameValuePair("password", loginRequest.getPassword()));
             formPail.add(new BasicNameValuePair("appid", loginRequest.getAppid()));
             HttpPost post = httpPostBuild(HttpURLConstant12306.LOGIN_URL, formPail, getCookieStr(null));
+            post.addHeader("Referer", HttpURLConstant12306.LOGIN_INIT);
+            post.addHeader("Origin", "https://kyfw.12306.cn");
             try (CloseableHttpResponse response = client.execute(post, context)) {
                 HttpEntity entity = response.getEntity();
                 String result = EntityUtils.toString(entity);
@@ -387,11 +389,11 @@ public class HttpURL12306 {
      */
     public String loginSuccessPassportUamtk(String appId, String uamtk) throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
-            HttpGet loginGet = httpGetBuild(HttpURLConstant12306.LOGIN_INIT_CDN1, getCookieStr(null));
+            /*HttpGet loginGet = httpGetBuild(HttpURLConstant12306.LOGIN_INIT_CDN1, getCookieStr(null));
             try (CloseableHttpResponse loginResponse = client.execute(loginGet, context)) {
                 // 此处只为获取认证前的cookie
                 cacheCookie(cookieStore.getCookies());
-            }
+            }*/
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("appid", appId));
             HttpPost post = httpPostBuild(HttpURLConstant12306.PASSPORT_UAMTK_STATIC_URL, formPail, getCookieStr(new String[]{"_passport_ct", "JSESSIONID"}));
@@ -569,7 +571,7 @@ public class HttpURL12306 {
      * @return
      * @throws Exception
      */
-    public MyOrder getOrderNoComplete() throws Exception {
+    public List<MyOrder> getOrderNoComplete() throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
             List<NameValuePair> formPail = new ArrayList<>();
             formPail.add(new BasicNameValuePair("_json_att", ""));
@@ -592,7 +594,7 @@ public class HttpURL12306 {
                 }
             }
         }
-        return new MyOrder();
+        return Collections.emptyList();
     }
 
 
@@ -815,13 +817,14 @@ public class HttpURL12306 {
      * @param json
      * @return
      */
-    public static MyOrder settingNoCompleteOrder(JSONObject json) {
-        MyOrder order = new MyOrder();
+    public static List<MyOrder> settingNoCompleteOrder(JSONObject json) {
+        List<MyOrder> orderList = new ArrayList<>();
         if (Objects.nonNull(json)) {
             List<JSONObject> array = JSONUtil.toList(json.getJSONArray("orderDBList"), JSONObject.class);
             array.forEach(x -> {
                 List<JSONObject> tickets = JSONUtil.toList(x.getJSONArray("tickets"), JSONObject.class);
                 tickets.forEach(t -> {
+                    MyOrder order = new MyOrder();
                     JSONObject passenger = t.get("passengerDTO", JSONObject.class);
                     JSONObject stationTrain = t.get("stationTrainDTO", JSONObject.class);
                     // 开始设置订单信息
@@ -842,10 +845,11 @@ public class HttpURL12306 {
                     order.setTicketTypeName(t.get("ticket_type_name", String.class));
                     order.setStartTimePage(x.get("start_time_page", String.class));
                     order.setArriveTimePage(x.get("arrive_time_page", String.class));
+                    orderList.add(order);
                 });
             });
         }
-        return order;
+        return orderList;
     }
 
 

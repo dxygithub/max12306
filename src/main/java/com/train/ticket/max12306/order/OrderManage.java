@@ -207,30 +207,33 @@ public class OrderManage {
      * @throws Exception
      */
     public ISPassCode startSubmitOrder(List<PassengerInfo> passengerInfos, String submitToken, String sessionId, String sig) throws Exception {
-        StringJoiner passengerTicketStr = new StringJoiner(",");
-        StringJoiner oldPassengerStr = new StringJoiner(",");
+        StringBuilder passengerTicketStrBUilder=new StringBuilder();
+        StringBuilder oldPassengerStrBUilder=new StringBuilder();
         passengerInfos.forEach(passengerInfo -> {
             // 乘车人车票字符串
-            passengerTicketStr.add(passengerInfo.getSeatType().getValue());
-            passengerTicketStr.add("0");
-            passengerTicketStr.add("1");
-            passengerTicketStr.add(passengerInfo.getPassengerName());
-            passengerTicketStr.add("1");
-            passengerTicketStr.add(passengerInfo.getPassengerIdNo());
-            passengerTicketStr.add(passengerInfo.getMobileNo());
-            passengerTicketStr.add("N");
-            passengerTicketStr.add(passengerInfo.getAllEncStr() + "_");
+            passengerTicketStrBUilder.append(passengerInfo.getSeatType().getValue()+",");
+            passengerTicketStrBUilder.append("0"+",");
+            passengerTicketStrBUilder.append("1"+",");
+            passengerTicketStrBUilder.append(passengerInfo.getPassengerName()+",");
+            passengerTicketStrBUilder.append("1"+",");
+            passengerTicketStrBUilder.append(passengerInfo.getPassengerIdNo()+",");
+            passengerTicketStrBUilder.append(passengerInfo.getMobileNo()+",");
+            passengerTicketStrBUilder.append("N"+",");
+            passengerTicketStrBUilder.append(passengerInfo.getAllEncStr()+"_");
 
             // 原有乘车人字符串
-            oldPassengerStr.add(passengerInfo.getPassengerName());
-            oldPassengerStr.add("1");
-            oldPassengerStr.add(passengerInfo.getPassengerIdNo());
-            oldPassengerStr.add("1_");
+            oldPassengerStrBUilder.append(passengerInfo.getPassengerName()+",");
+            oldPassengerStrBUilder.append("1"+",");
+            oldPassengerStrBUilder.append(passengerInfo.getPassengerIdNo()+",");
+            oldPassengerStrBUilder.append("1_");
         });
 
-        String afterPassengerTicketStr = passengerTicketStr.toString();
+        String afterPassengerTicketStr = passengerTicketStrBUilder.toString();
         afterPassengerTicketStr = afterPassengerTicketStr.substring(0, afterPassengerTicketStr.lastIndexOf("_"));
-        String afterOldPassengerStr = oldPassengerStr.toString();
+        String afterOldPassengerStr = oldPassengerStrBUilder.toString();
+
+        LOGGER.info("======> 乘车人字符串: {}",afterPassengerTicketStr);
+        LOGGER.info("======> 原有乘车人字符串: {}",afterOldPassengerStr);
 
         List<NameValuePair> formPail = new ArrayList<>();
         formPail.add(new BasicNameValuePair("cancel_flag", "2"));
@@ -259,6 +262,7 @@ public class OrderManage {
                     String message = json.get("messages", String.class);
                     if (SUCCESS == json.get("httpstatus", Integer.class) && json.get("status", Boolean.class)) {
                         JSONObject data = json.get("data", JSONObject.class);
+                        String errMsg=data.get("errMsg",String.class);
                         if (data.get("submitStatus", Boolean.class)) {
                             // 是否需要验证码: Y 需要 / N 不需要
                             String ifShowPassCode = data.get("ifShowPassCode", String.class);
@@ -279,7 +283,7 @@ public class OrderManage {
                                 Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
                             } else if (StringUtils.equals("X", ifShowPassCode)) {
-                                LOGGER.info("======> 本次订单提交预定失败...");
+                                LOGGER.info("======> 本次订单提交预定失败，原因: {}...",errMsg);
                                 return ISPassCode.ERR;
                             } else {
                                 // LOGGER.info("======> 本次订单提交不需要验证码...");
@@ -290,7 +294,7 @@ public class OrderManage {
                                 return ISPassCode.NO;
                             }
                         } else {
-                            LOGGER.info("======> 本次订单提交预定失败...");
+                            LOGGER.info("======> 本次订单提交预定失败，原因: {}...",errMsg);
                         }
                     } else {
                         LOGGER.info("======> 本次订单提交预定失败，原因: {}...", message);
@@ -364,30 +368,30 @@ public class OrderManage {
      * @param passengerInfos 乘车人
      */
     public OrderStatus confirmSingleForQueue(String trainLocation, List<PassengerInfo> passengerInfos) throws Exception {
-        StringJoiner passengerTicketStr = new StringJoiner(",");
-        StringJoiner oldPassengerStr = new StringJoiner(",");
+        StringBuilder passengerTicketStrBUilder=new StringBuilder();
+        StringBuilder oldPassengerStrBUilder=new StringBuilder();
         passengerInfos.forEach(passengerInfo -> {
             // 乘车人车票字符串
-            passengerTicketStr.add(passengerInfo.getSeatType().getValue());
-            passengerTicketStr.add("0");
-            passengerTicketStr.add("1");
-            passengerTicketStr.add(passengerInfo.getPassengerName());
-            passengerTicketStr.add("1");
-            passengerTicketStr.add(passengerInfo.getPassengerIdNo());
-            passengerTicketStr.add(passengerInfo.getMobileNo());
-            passengerTicketStr.add("N");
-            passengerTicketStr.add(passengerInfo.getAllEncStr() + "_");
+            passengerTicketStrBUilder.append(passengerInfo.getSeatType().getValue()+",");
+            passengerTicketStrBUilder.append("0"+",");
+            passengerTicketStrBUilder.append("1"+",");
+            passengerTicketStrBUilder.append(passengerInfo.getPassengerName()+",");
+            passengerTicketStrBUilder.append("1"+",");
+            passengerTicketStrBUilder.append(passengerInfo.getPassengerIdNo()+",");
+            passengerTicketStrBUilder.append(passengerInfo.getMobileNo()+",");
+            passengerTicketStrBUilder.append("N"+",");
+            passengerTicketStrBUilder.append(passengerInfo.getAllEncStr()+"_");
 
             // 原有乘车人字符串
-            oldPassengerStr.add(passengerInfo.getPassengerName());
-            oldPassengerStr.add("1");
-            oldPassengerStr.add(passengerInfo.getPassengerIdNo());
-            oldPassengerStr.add("1_");
+            oldPassengerStrBUilder.append(passengerInfo.getPassengerName()+",");
+            oldPassengerStrBUilder.append("1"+",");
+            oldPassengerStrBUilder.append(passengerInfo.getPassengerIdNo()+",");
+            oldPassengerStrBUilder.append("1_");
         });
 
-        String afterPassengerTicketStr = passengerTicketStr.toString();
+        String afterPassengerTicketStr = passengerTicketStrBUilder.toString();
         afterPassengerTicketStr = afterPassengerTicketStr.substring(0, afterPassengerTicketStr.lastIndexOf("_"));
-        String afterOldPassengerStr = oldPassengerStr.toString();
+        String afterOldPassengerStr = oldPassengerStrBUilder.toString();
 
         List<NameValuePair> formPail = new ArrayList<>();
         formPail.add(new BasicNameValuePair("passengerTicketStr", afterPassengerTicketStr));

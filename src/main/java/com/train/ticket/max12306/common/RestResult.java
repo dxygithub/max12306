@@ -31,6 +31,11 @@ public class RestResult<T> {
     private T data;
 
     /**
+     * 是否需要滑块验证: 下单时用
+     */
+    private int isSlidePassCode;
+
+    /**
      * 请求成功
      * @return
      */

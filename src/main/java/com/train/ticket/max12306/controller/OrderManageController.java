@@ -11,7 +11,6 @@ import com.train.ticket.max12306.enumeration.ISPassCode;
 import com.train.ticket.max12306.enumeration.OrderStatus;
 import com.train.ticket.max12306.order.OrderManage;
 import com.train.ticket.max12306.requestvo.SubmitOrderVo;
-import com.train.ticket.max12306.service.impl.UserLoginServiceImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
@@ -80,7 +79,7 @@ public class OrderManageController {
                         // 开始获取订单token相关参数
                         Map<String, String> tokenMap = order.getSubmitToken();
                         if (!CollectionUtils.isEmpty(tokenMap)) {
-                            // 判断是否需要滑块验证，目前12306在提交订单时，尤其是准点开售时，不在需要图片验证
+                            // 判断是否需要滑块验证，目前12306在提交订单时，尤其是准点开售时，不再需要图片验证
                             if (StringUtils.equals("1", tokenMap.get("ifCheckSlidePasscode"))) {
                                 LOGGER.info("======> 本次订单提交需要滑块验证，请注意浏览器...");
                                 // 滑块token
@@ -88,7 +87,7 @@ public class OrderManageController {
                                 // 交给前端完成滑块验证，目前为手动验证
                                 Map<String, String> result = new HashMap<>(16);
                                 result.put("ifCheckSlidePasscodeToken", ifCheckSlidePasscodeToken);
-                                return RestResult.SUCCESS().data(result).message("本次订单提交需要滑块验证").build();
+                                return RestResult.SUCCESS().data(result).isSlidePassCode(1).message("本次订单提交需要滑块验证").build();
                             } else {
                                 // 不需要滑块验证
                                 LOGGER.info("======> 本次订单提交不需要验证码...");
@@ -176,7 +175,7 @@ public class OrderManageController {
                         String sequenceNo = order.orderWait();
                         if (StringUtils.isNotBlank(sequenceNo)) {
                             LOGGER.info("======> 恭喜您订票成功，订单号为：{}, 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付！", sequenceNo);
-                            return RestResult.SUCCESS().data(sequenceNo).message(String.format("恭喜您订票成功，订单号为：%s, 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付！", sequenceNo)).build();
+                            return RestResult.SUCCESS().data(sequenceNo).isSlidePassCode(0).message(String.format("恭喜您订票成功，订单号为：%s, 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付！", sequenceNo)).build();
                         } else {
                             return RestResult.SERVER_ERROR().data(orderQueueRes).message("订单等待失败或超时").build();
                         }
@@ -229,5 +228,12 @@ public class OrderManageController {
             }
         }
         return 5;
+    }
+
+    public static void main(String[] args) {
+        Map<String, String> result = new HashMap<>(16);
+        result.put("ifCheckSlidePasscodeToken", "asdasfffF;24134354354");
+        System.out.println(JSONUtil.toJsonStr(RestResult.SUCCESS().data(result).isSlidePassCode(1).build()));
+
     }
 }
