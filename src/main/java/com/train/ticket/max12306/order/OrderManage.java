@@ -273,14 +273,14 @@ public class OrderManage {
                                 LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
                                 LOGGER.info("======> 订单检查并提交成功...");
                                 // 进入安全等待期
-                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
+                                // Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.YES;
                             } else if (StringUtils.equals("N", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交不需要验证码...");
                                 LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
                                 LOGGER.info("======> 订单检查并提交成功...");
                                 // 进入安全等待期
-                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
+                                // Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
                             } else if (StringUtils.equals("X", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交预定失败，原因: {}...",errMsg);
@@ -290,7 +290,7 @@ public class OrderManage {
                                 LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
                                 LOGGER.info("======> 订单检查并提交成功...");
                                 // 进入安全等待期
-                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
+                                // Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
                             }
                         } else {
