@@ -76,6 +76,11 @@ public class HttpURL12306 {
     public static final Map<String, String> COOKIE_CACHE_MAP = new HashMap<>(16);
 
     /**
+     * 可用cdn
+     */
+    public static List<String> cdnList = new ArrayList<>();
+
+    /**
      * 本地cookie实例
      */
     public static CookieStore cookieStore;
@@ -1032,6 +1037,24 @@ public class HttpURL12306 {
         // 暂时携带该cookie,后面换成动态获取
         sj.add(String.format("%s=%s", "BIGipServerpassport", BIGIPSERVERPASSPORT));
         return sj.toString();
+    }
+
+    /**
+     * 获取随机cdn下标位置
+     *
+     * @return
+     */
+    public static int getRandomIndex() {
+        int max, min, index;
+        min = 0;
+        index = 0;
+        max = cdnList.size() - 1;
+        for (int x = 0; x < cdnList.size(); x++) {
+            index = (int) (Math.random() * (max - min) + min);
+
+            LOGGER.info("======> 下标:{}，本次服务cdn地址: {}", index, cdnList.get(index));
+        }
+        return index;
     }
 
     /**
