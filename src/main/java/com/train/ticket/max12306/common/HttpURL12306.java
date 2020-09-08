@@ -57,6 +57,8 @@ public class HttpURL12306 {
 
     private static final String BIGIPSERVERPASSPORT = "820510986.50215.0000";
 
+    public static final String host = "kyfw.12306.cn";
+
     @Autowired
     private ConfigFileUtil config;
 
@@ -968,7 +970,11 @@ public class HttpURL12306 {
      * @return
      */
     public static HttpGet httpGetBuild(String url, String cookie) {
-        HttpGet httpGet = new HttpGet(url);
+        int index = getRandomIndex();
+        String cdn = cdnList.get(index);
+        LOGGER.info("======> Get: 服务器地址: {} <======", cdn);
+        HttpGet httpGet = new HttpGet(url.replace("kyfw.12306.cn", cdn));
+        httpGet.addHeader("Host", host);
         httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
         httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
         httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
@@ -985,7 +991,11 @@ public class HttpURL12306 {
      * @return
      */
     public static HttpPost httpPostBuild(String url, List<NameValuePair> formPail, String cookie) throws Exception {
+        /*int index = getRandomIndex();
+        String cdn = cdnList.get(index);
+        LOGGER.info("======> Post: 服务器地址: {} <======", cdn);*/
         HttpPost httpPost = new HttpPost(url);
+        // httpPost.addHeader("Host", host);
         httpPost.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
         httpPost.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
         httpPost.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
@@ -1049,11 +1059,12 @@ public class HttpURL12306 {
         min = 0;
         index = 0;
         max = cdnList.size() - 1;
-        for (int x = 0; x < cdnList.size(); x++) {
+        index = (int) (Math.random() * (max - min) + min);
+        /*for (int x = 0; x < cdnList.size(); x++) {
             index = (int) (Math.random() * (max - min) + min);
 
             LOGGER.info("======> 下标:{}，本次服务cdn地址: {}", index, cdnList.get(index));
-        }
+        }*/
         return index;
     }
 

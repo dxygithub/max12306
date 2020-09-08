@@ -1,6 +1,7 @@
 package com.train.ticket.max12306.common;
 
 import cn.hutool.json.JSONUtil;
+import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -47,7 +48,7 @@ public class CdnUtil {
     private static Set<String> availableCdnList = new HashSet<>();
 
     // 用于执行cdn检测任务的线程池
-    private static ExecutorService executorService = Executors.newCachedThreadPool();
+    private static ExecutorService executorService = Executors.newFixedThreadPool(1830/2);
 
     /**
      * 读取cdn文件
@@ -74,13 +75,18 @@ public class CdnUtil {
      * @return
      */
     public static boolean checkCdn(String ip) {
-        HttpGet get = HttpURL12306.httpGetBuild(String.format(station_url, ip), null);
-        get.addHeader("Host", host);
+        HttpGet httpGet = new HttpGet(String.format(station_url, ip));
+        httpGet.addHeader("Host", host);
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+        httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
         RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(3000)
                 .setConnectionRequestTimeout(1000).setSocketTimeout(3000).build();
-        get.setConfig(requestConfig);
+        httpGet.setConfig(requestConfig);
         try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
-            try (CloseableHttpResponse response = client.execute(get)) {
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
                 if (response.getStatusLine().getStatusCode() == SUCCESS) {
                     HttpEntity entity = response.getEntity();
                     String result = EntityUtils.toString(entity);
@@ -111,7 +117,7 @@ public class CdnUtil {
             executorService.execute(createCheckCdnTask(cdn));
         }
         // 等待任务执行结束
-        Thread.sleep(15000);
+        Thread.sleep(10000);
         LOGGER.info("======> cdn检测结束 <======");
         LOGGER.info("======> 可用cdn: {}个 -> {} ...", isCdnCount, JSONUtil.toJsonStr(availableCdnList));
         LOGGER.info("======> 不可用cdn: {}个 ...", noCdnCount);
@@ -130,13 +136,14 @@ public class CdnUtil {
         return new Runnable() {
             @Override
             public void run() {
-                synchronized (this) {
-                    boolean flag = checkCdn(ip);
-                    if (flag) {
-
+                boolean flag = checkCdn(ip);
+                if (flag) {
+                    synchronized (this) {
                         isCdnCount++;
                         availableCdnList.add(ip);
-                    } else {
+                    }
+                } else {
+                    synchronized (this) {
                         noCdnCount++;
                     }
                 }

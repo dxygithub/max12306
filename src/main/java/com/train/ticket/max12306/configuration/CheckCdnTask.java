@@ -52,7 +52,7 @@ public class CheckCdnTask implements SchedulingConfigurer {
             }
         }, triggerContext -> {
             // 每五秒执行一次
-            String cron = "0/10 * * * * ?";
+            String cron = "0/3 * * * * ?";
             return new CronTrigger(cron).nextExecutionTime(triggerContext);
         });
     }
