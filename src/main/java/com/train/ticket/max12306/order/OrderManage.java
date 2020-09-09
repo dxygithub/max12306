@@ -7,6 +7,7 @@ import com.train.ticket.max12306.common.HttpURL12306;
 import com.train.ticket.max12306.common.HttpURLConstant12306;
 import com.train.ticket.max12306.entity.PassengerInfo;
 import com.train.ticket.max12306.entity.TicketInfo;
+import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
 import com.train.ticket.max12306.enumeration.ISPassCode;
 import com.train.ticket.max12306.enumeration.OrderStatus;
 import com.train.ticket.max12306.enumeration.SeatType;
@@ -270,15 +271,15 @@ public class OrderManage {
                             String ifShowPassCodeTime = data.get("ifShowPassCodeTime", String.class);
                             if (StringUtils.equals("Y", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交需要验证码...");
+                                LOGGER.info("======> 订单检查成功...");
                                 LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
-                                LOGGER.info("======> 订单检查并提交成功...");
                                 // 进入安全等待期
                                 Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.YES;
                             } else if (StringUtils.equals("N", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交不需要验证码...");
+                                LOGGER.info("======> 订单检查成功...");
                                 LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
-                                LOGGER.info("======> 订单检查并提交成功...");
                                 // 进入安全等待期
                                 Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
@@ -287,8 +288,8 @@ public class OrderManage {
                                 return ISPassCode.ERR;
                             } else {
                                 // LOGGER.info("======> 本次订单提交不需要验证码...");
+                                LOGGER.info("======> 订单检查成功...");
                                 LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
-                                LOGGER.info("======> 订单检查并提交成功...");
                                 // 进入安全等待期
                                 Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
@@ -457,10 +458,15 @@ public class OrderManage {
         // 开始进入订单等待时间
         while (waitTime >= 0) {
             if (sleepCount <= 20) {
-                HttpGet get = HttpURL12306.httpGetBuild(
-                        HttpURLConstant12306.ORDER_WAIT.
-                                replace("{1}", String.valueOf(System.currentTimeMillis())).
-                                replace("{2}", TOKEN_MAP.get("submitToken")), url12306.getCookieStr(null));
+                HttpGet get = new HttpGet(HttpURLConstant12306.ORDER_WAIT.
+                        replace("{1}", String.valueOf(System.currentTimeMillis())).
+                        replace("{2}", TOKEN_MAP.get("submitToken")));
+                get.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+                get.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+                get.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+                get.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+                get.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+                get.addHeader(HttpHeaderParamter.COOKIE.getKey(), url12306.getCookieStr(null));
                 try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
                     try (CloseableHttpResponse response = client.execute(get, HttpURL12306.context)) {
                         HttpEntity entity = response.getEntity();

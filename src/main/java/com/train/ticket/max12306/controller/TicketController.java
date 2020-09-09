@@ -43,7 +43,7 @@ public class TicketController {
                 mapList.forEach(x->{
                     Map<String,String> map=new HashMap<>(16);
                     map.put("fromStationCode",x.getFromStationCode());
-                    map.put("fromStationName",x.getFromeStationName());
+                    map.put("fromStationName",x.getFromStationName());
                     fromStations.add(map);
                 });
             }

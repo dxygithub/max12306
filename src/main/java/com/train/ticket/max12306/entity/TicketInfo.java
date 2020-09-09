@@ -49,7 +49,7 @@ public class TicketInfo {
     /**
      * 出发站
      */
-    private String fromeStationName;
+    private String fromStationName;
 
     /**
      * 到达站编码
@@ -59,7 +59,7 @@ public class TicketInfo {
     /**
      * 到达站
      */
-    private String toStationMame;
+    private String toStationName;
 
     /**
      * 出发时间

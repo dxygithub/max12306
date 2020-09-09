@@ -109,6 +109,7 @@ public class UserLoginServiceImpl implements UserLoginService {
     @Override
     public RestResult checkImgCaptcha(String imgIndex, String timer, String img, boolean autoCheck) {
         try {
+            String answer = "";
             String resultCode = "";
             if (!autoCheck) {
                 if (StringUtils.isBlank(imgIndex)) {
@@ -120,13 +121,13 @@ public class UserLoginServiceImpl implements UserLoginService {
             } else {
                 LOGGER.info("======> 开始自动识别验证码...");
                 String[] autoCheckImgIndex = autoCheckImgCaptcha(img);
-                String answer = capthchaXYMatching(autoCheckImgIndex);
+                answer = capthchaXYMatching(autoCheckImgIndex);
                 resultCode = url12306.checkImgCapthcha(answer, timer);
             }
             if (resultCode.equals("4")) {
-                return RestResult.SUCCESS().data("4").message("验证码校验成功").build();
+                return RestResult.SUCCESS().data("4-"+answer).message("验证码校验成功").build();
             } else {
-                return RestResult.SUCCESS().data("5").message("验证码校验失败").build();
+                return RestResult.SUCCESS().data("5-").message("验证码校验失败").build();
             }
         } catch (Exception e) {
             e.printStackTrace();

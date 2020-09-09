@@ -100,7 +100,7 @@ class Max12306ApplicationTests {
                 LOGGER.info("\n车次:{}，出发站:{}，到达站:{}，出发时间:{}，到达时间:{}，历时:{}/hh:mm，\n" +
                                 "商务座/特等座:{}，一等座:{}，二等座:{}，高级软卧:{}，软卧:{}，动卧:{}，硬卧:{}，软座:{}，硬座:{}，无座:{}，其他:{}，备注:{}，座位类型:{}\n" +
                                 "{}，{}，{}，{}，{}，{}，{}，{}，{}，{}，{}\n",
-                        x.getTrainCode(), x.getFromeStationName(), x.getToStationMame(), x.getFromTime(), x.getToTime(), x.getLastTime(),
+                        x.getTrainCode(), x.getFromStationName(), x.getToStationName(), x.getFromTime(), x.getToTime(), x.getLastTime(),
                         StringUtils.isBlank(x.getBusinessSeatCount()) ? "--" : x.getBusinessSeatCount(),
                         StringUtils.isBlank(x.getFirstSeatCount()) ? "--" : x.getFirstSeatCount(),
                         StringUtils.isBlank(x.getSecondSeatCount()) ? "--" : x.getSecondSeatCount(),

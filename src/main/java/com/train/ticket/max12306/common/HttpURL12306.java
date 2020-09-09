@@ -163,6 +163,13 @@ public class HttpURL12306 {
                         if (status == SUCCESS) {
                             JSONObject data = (JSONObject) jsonObject.get("data");
                             JSONArray ticketArray = (JSONArray) data.get("result");
+                            if (ticketArray.size() == 0) {
+                                LOGGER.info("======> {} {} - {} 暂无出发车次",
+                                        ticketRequest.getFromDate(),
+                                        STATION_MAP.get(ticketRequest.getFromStationCode()),
+                                        STATION_MAP.get(ticketRequest.getToStationCode()));
+                                return null;
+                            }
                             // 车票信息
                             String[] ticketStrArray = ticketArray.toArray(new String[0]);
                             String map = data.get("map").toString();
@@ -717,9 +724,9 @@ public class HttpURL12306 {
             ticketInfo.setStartStationCode(ticketDes[4]);
             ticketInfo.setEndStationCode(ticketDes[5]);
             ticketInfo.setFromStationCode(ticketDes[6]);
-            ticketInfo.setFromeStationName(STATION_MAP.get(ticketDes[6]));
+            ticketInfo.setFromStationName(STATION_MAP.get(ticketDes[6]));
             ticketInfo.setToStationCode(ticketDes[7]);
-            ticketInfo.setToStationMame(STATION_MAP.get(ticketDes[7]));
+            ticketInfo.setToStationName(STATION_MAP.get(ticketDes[7]));
             ticketInfo.setFromTime(ticketDes[8]);
             ticketInfo.setToTime(ticketDes[9]);
             ticketInfo.setLastTime(ticketDes[10]);
