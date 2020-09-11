@@ -47,6 +47,17 @@ public enum SeatType{
      * 无座
      */
     NONE_SEAT("1"),
+
+    /**
+     * 二等卧: 动车
+     */
+    SECOND_SOFT_SLEEP("J"),
+
+    /**
+     * 一等卧: 动车
+     */
+    FIRST_SOFT_SLEEP("I"),
+
     /**
      * 特等座
      */

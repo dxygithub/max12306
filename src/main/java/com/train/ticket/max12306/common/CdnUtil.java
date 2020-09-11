@@ -56,9 +56,9 @@ public class CdnUtil {
      * @return
      * @throws Exception
      */
-    public static List<String> readerCdnFile() throws Exception {
+    public static Set<String> readerCdnFile() throws Exception {
         File file = new File(cdnPath);
-        List<String> cdnList = new ArrayList<>();
+        Set<String> cdnList = new HashSet<>();
         try (BufferedReader bfr = new BufferedReader(new FileReader(file))) {
             String lineContent = "";
             while (StringUtils.isNotBlank((lineContent = bfr.readLine()))) {
@@ -112,7 +112,7 @@ public class CdnUtil {
      * @return
      */
     public static List<String> getAvailableCdn() throws Exception {
-        List<String> existCdn = readerCdnFile();
+        Set<String> existCdn = readerCdnFile();
         for (String cdn : existCdn) {
             executorService.execute(createCheckCdnTask(cdn));
         }
@@ -138,12 +138,12 @@ public class CdnUtil {
             public void run() {
                 boolean flag = checkCdn(ip);
                 if (flag) {
-                    synchronized (this) {
+                    synchronized (CdnUtil.class) {
                         isCdnCount++;
                         availableCdnList.add(ip);
                     }
                 } else {
-                    synchronized (this) {
+                    synchronized (CdnUtil.class) {
                         noCdnCount++;
                     }
                 }

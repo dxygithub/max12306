@@ -229,11 +229,4 @@ public class OrderManageController {
         }
         return 5;
     }
-
-    public static void main(String[] args) {
-        Map<String, String> result = new HashMap<>(16);
-        result.put("ifCheckSlidePasscodeToken", "asdasfffF;24134354354");
-        System.out.println(JSONUtil.toJsonStr(RestResult.SUCCESS().data(result).isSlidePassCode(1).build()));
-
-    }
 }

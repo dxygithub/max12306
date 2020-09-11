@@ -974,6 +974,7 @@ public class HttpURL12306 {
      * 创建get请求
      *
      * @param url
+     * @param cookie
      * @return
      */
     public static HttpGet httpGetBuild(String url, String cookie) {
@@ -993,8 +994,11 @@ public class HttpURL12306 {
 
     /**
      * 创建post请求
+     * 所有post请求暂时不使用cdn，容易被封IP
      *
      * @param url
+     * @param formPail 请求参数
+     * @param cookie
      * @return
      */
     public static HttpPost httpPostBuild(String url, List<NameValuePair> formPail, String cookie) throws Exception {
@@ -1057,7 +1061,7 @@ public class HttpURL12306 {
     }
 
     /**
-     * 获取随机cdn下标位置
+     * 获取随机cdn
      *
      * @return
      */
@@ -1076,7 +1080,7 @@ public class HttpURL12306 {
     }
 
     /**
-     * 车站去重-stream
+     * 去重-stream
      *
      * @param keyExtractor
      * @param <T>
