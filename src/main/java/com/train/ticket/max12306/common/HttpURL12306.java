@@ -371,7 +371,7 @@ public class HttpURL12306 {
             formPail.add(new BasicNameValuePair("password", loginRequest.getPassword()));
             formPail.add(new BasicNameValuePair("appid", loginRequest.getAppid()));
             HttpPost post = httpPostBuild(HttpURLConstant12306.LOGIN_URL, formPail, getCookieStr(null));
-            post.addHeader("Referer", HttpURLConstant12306.LOGIN_INIT);
+            post.addHeader("Referer", "https://kyfw.12306.cn/otn/resources/login.html");
             post.addHeader("Origin", "https://kyfw.12306.cn");
             try (CloseableHttpResponse response = client.execute(post, context)) {
                 HttpEntity entity = response.getEntity();

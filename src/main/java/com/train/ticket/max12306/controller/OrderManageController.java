@@ -71,7 +71,17 @@ public class OrderManageController {
 
             try {
                 // 检查用户登录是否失效
-                String isLogin = url12306.checkUser();
+                String isLogin = "";
+                while (!StringUtils.equals("Y", isLogin)) {
+                    isLogin = url12306.checkUser();
+                    if (!StringUtils.equals("Y", isLogin)) {
+                        String tk = HttpURL12306.COOKIE_CACHE_MAP.get("tk");
+                        // 快速自动刷新用户
+                        url12306.getUserName(tk);
+                        // 等待500毫秒继续执行，防止请求被封
+                        Thread.sleep(500L);
+                    }
+                }
                 if (StringUtils.equals("Y", isLogin)) {
                     // 开始提交预定订单
                     OrderStatus subOrderStatus = order.submitOrderRequest(ticket.getTicketSecretKey(), orderVoST.getFromDate(), backDate, orderVoST.getFromStationCode(), orderVoST.getToStationCode());
