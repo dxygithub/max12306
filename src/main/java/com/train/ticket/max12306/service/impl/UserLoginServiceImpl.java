@@ -67,6 +67,10 @@ public class UserLoginServiceImpl implements UserLoginService {
         try {
             String result = url12306.getImgCaptcha();
             resultArr = result.split("--");
+            // 登录前获取浏览器请求标识参数
+            if (!(HttpURL12306.COOKIE_CACHE_MAP.containsKey("RAIL_DEVICEID") && HttpURL12306.COOKIE_CACHE_MAP.containsKey("RAIL_EXPIRATION"))) {
+                HttpURL12306.getDeviceIdParams();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -125,7 +129,7 @@ public class UserLoginServiceImpl implements UserLoginService {
                 resultCode = url12306.checkImgCapthcha(answer, timer);
             }
             if (resultCode.equals("4")) {
-                return RestResult.SUCCESS().data("4-"+answer).message("验证码校验成功").build();
+                return RestResult.SUCCESS().data("4-" + answer).message("验证码校验成功").build();
             } else {
                 return RestResult.SUCCESS().data("5-").message("验证码校验失败").build();
             }

@@ -1,10 +1,12 @@
 package com.train.ticket.max12306.common;
 
+import cn.hutool.core.codec.Base64;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.entity.*;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
+import com.train.ticket.max12306.exception.Max12306Exception;
 import com.train.ticket.max12306.requestvo.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.net.ssl.SSLContext;
+import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -692,6 +695,86 @@ public class HttpURL12306 {
     }
 
     /**
+     * 获取浏览器标识请求参数
+     */
+    public static void getDeviceIdParams() throws Exception {
+        String deviceIDUrl = getDeviceIdRequestUrl();
+        String params = deviceIDUrl.substring(deviceIDUrl.indexOf("?") + 1);
+        String[] paramsArr = params.split("&");
+        Map<String, String> paramsMap = new HashMap<>(16);
+        for (String item : paramsArr) {
+            String[] param = item.split("=");
+            if (param != null) {
+                paramsMap.put(param[0], param[1]);
+            }
+        }
+        StringJoiner paramsSJ = new StringJoiner("&");
+        for (String key : paramsMap.keySet()) {
+            paramsSJ.add(key + "=" + URLEncoder.encode(paramsMap.get(key), "UTF-8"));
+        }
+
+        String newUrl = paramsSJ.toString();
+        HttpGet httpGet = new HttpGet(deviceIDUrl.substring(0, deviceIDUrl.indexOf("?") + 1) + newUrl);
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+        httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+        try (CloseableHttpClient client = httpClientBuild()) {
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    String jsonResult = StringUtils.substringBetween(result, "('", "')");
+                    JSONObject json = JSONUtil.parseObj(jsonResult);
+                    if (Objects.nonNull(json)) {
+                        String RAIL_EXPIRATION = json.get("exp", String.class);
+                        String RAIL_DEVICEID = json.get("dfp", String.class);
+                        COOKIE_CACHE_MAP.put("RAIL_EXPIRATION", RAIL_EXPIRATION);
+                        COOKIE_CACHE_MAP.put("RAIL_DEVICEID", RAIL_DEVICEID);
+                        LOGGER.info("======> 获取浏览器标识请求参数成功...");
+                        return;
+                    }
+                }
+            }
+        }
+        LOGGER.info("======> 获取浏览器标识请求参数失败...");
+        throw new Max12306Exception("获取浏览器标识请求参数失败...");
+    }
+
+    /**
+     * 获取浏览器标识请求参数url完整地址
+     *
+     * @return
+     */
+    public static String getDeviceIdRequestUrl() throws Exception {
+        HttpGet httpGet = new HttpGet(HttpURLConstant12306.API_GET_BROWSER_DEVICE_ID);
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+        httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+        try (CloseableHttpClient client = httpClientBuild()) {
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    JSONObject json = JSONUtil.parseObj(result);
+                    String deviceIDUrl = Base64.decodeStr(json.get("id", String.class), "UTF-8");
+                    if (StringUtils.isNotBlank(deviceIDUrl)) {
+                        return deviceIDUrl;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 用户退出登录
      *
      * @throws Exception
@@ -981,6 +1064,7 @@ public class HttpURL12306 {
         int index = getRandomIndex();
         String cdn = cdnList.get(index);
         LOGGER.info("======> Get: 服务器地址: {} <======", cdn);
+
         HttpGet httpGet = new HttpGet(url.replace("kyfw.12306.cn", cdn));
         httpGet.addHeader("Host", host);
         httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
@@ -1005,6 +1089,7 @@ public class HttpURL12306 {
         /*int index = getRandomIndex();
         String cdn = cdnList.get(index);
         LOGGER.info("======> Post: 服务器地址: {} <======", cdn);*/
+
         HttpPost httpPost = new HttpPost(url);
         // httpPost.addHeader("Host", host);
         httpPost.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
@@ -1053,8 +1138,8 @@ public class HttpURL12306 {
             }
         }
         // 以下两个cookie参数为必带参数
-        sj.add(String.format("%s=%s", "RAIL_EXPIRATION", config.getRAIL_EXPIRATION()));
-        sj.add(String.format("%s=%s", "RAIL_DEVICEID", config.getRAIL_DEVICEID()));
+        /*sj.add(String.format("%s=%s", "RAIL_EXPIRATION", config.getRAIL_EXPIRATION()));
+        sj.add(String.format("%s=%s", "RAIL_DEVICEID", config.getRAIL_DEVICEID()));*/
         // 暂时携带该cookie,后面换成动态获取
         sj.add(String.format("%s=%s", "BIGipServerpassport", BIGIPSERVERPASSPORT));
         return sj.toString();

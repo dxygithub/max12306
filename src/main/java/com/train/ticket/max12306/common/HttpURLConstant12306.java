@@ -167,6 +167,11 @@ public interface HttpURLConstant12306 {
     String ORDER_IMG_CAPTCHA_CHECK="https://kyfw.12306.cn/otn/passcodeNew/checkRandCodeAnsyn";
 
     /**
+     * 获取浏览器标识参数: 云平台获取
+     */
+    String API_GET_BROWSER_DEVICE_ID="https://12306-rail-id-v2.pjialin.com/";
+
+    /**
      * 获取RAIL_EXPIRATION和RAIL_DEVICEID参数：get(algID:{1}、hashCode:{2}、timestamp:{3}当前时间毫秒数)
      */
     String GET_RAIL_URL =   "https://kyfw.12306.cn/otn/HttpZF/logdevice?" +
