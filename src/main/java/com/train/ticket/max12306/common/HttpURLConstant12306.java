@@ -28,17 +28,17 @@ public interface HttpURLConstant12306 {
     /**
      * 获取cookie: route: get
      */
-    String LOGIN_BANNER="https://kyfw.12306.cn/otn/index12306/getLoginBanner";
+    String LOGIN_BANNER = "https://kyfw.12306.cn/otn/index12306/getLoginBanner";
 
     /**
      * 获取JSESESSIONID:get
      */
-    String JSESESSIONID="https://kyfw.12306.cn/otn/passport?redirect=/otn/login/userLogin";
+    String JSESESSIONID = "https://kyfw.12306.cn/otn/passport?redirect=/otn/login/userLogin";
 
     /**
      * 获取cookie: uKey(cookie中携带tk获取): get
      */
-    String USER_LOGIN="https://kyfw.12306.cn/otn/login/userLogin";
+    String USER_LOGIN = "https://kyfw.12306.cn/otn/login/userLogin";
 
     /**
      * 车票查询url: get(出发日期:{1}、始发站:{2}、终点站:{3}、车票类型:{4})
@@ -48,133 +48,149 @@ public interface HttpURLConstant12306 {
     /**
      * 车票价格查询url: get(列车号:{1}、出发站站序:{2}、到达站站序{3}、座位类型{4}、出发日期:{5})
      */
-    String TICKET_PRICE_QUERY_URL="https://kyfw.12306.cn/otn/leftTicket/queryTicketPrice?train_no={1}&from_station_no={2}&to_station_no={3}&seat_types={4}&train_date={5}";
+    String TICKET_PRICE_QUERY_URL = "https://kyfw.12306.cn/otn/leftTicket/queryTicketPrice?train_no={1}&from_station_no={2}&to_station_no={3}&seat_types={4}&train_date={5}";
 
     /**
      * 获取登录验证码: get(当前时间毫秒数:{1},{2},{3})
      */
-    String GET_CAPTCHA="https://kyfw.12306.cn/passport/captcha/captcha-image64?login_site=E&module=login&rand=sjrand&{1}&callback=jQuery191013540634449692446_{2}&_={3}";
+    String GET_CAPTCHA = "https://kyfw.12306.cn/passport/captcha/captcha-image64?login_site=E&module=login&rand=sjrand&{1}&callback=jQuery191013540634449692446_{2}&_={3}";
 
     /**
      * 校验验证码: get(验证码坐标:{xyz},{1}{2}:回调函数毫秒数)
      */
-    String CHECK_CAPTCHA="https://kyfw.12306.cn/passport/captcha/captcha-check?callback=jQuery191013540634449692446_{1}&answer={xyz}&rand=sjrand&login_site=E&_={2}";
+    String CHECK_CAPTCHA = "https://kyfw.12306.cn/passport/captcha/captcha-check?callback=jQuery191013540634449692446_{1}&answer={xyz}&rand=sjrand&login_site=E&_={2}";
 
     /**
      * 图片验证码OCR校验: post(img: img-baseCode64)
      * 校验响应速度较慢
      */
-    String OCR_AUTO_CHECK="https://12306-ocr.pjialin.com/check/";
+    String OCR_AUTO_CHECK = "https://12306-ocr.pjialin.com/check/";
 
     /**
      * 初始化滑块验证: post(appid/username/slideMode)
      */
-    String INIT_SLIDE_PASSPORT_URL="https://kyfw.12306.cn/passport/web/slide-passcode";
+    String INIT_SLIDE_PASSPORT_URL = "https://kyfw.12306.cn/passport/web/slide-passcode";
 
     /**
      * 登录请求: post 参数->{“username:用户名”:“xxx”, “password:密码”:“xxx”, “appid”:“otn”, “answer:图形验证码坐标”:“xxx”}
      */
-    String LOGIN_URL="https://kyfw.12306.cn/passport/web/login";
+    String LOGIN_URL = "https://kyfw.12306.cn/passport/web/login";
 
     /**
      * 用户认证: post(appid)
      */
-    String PASSPORT_UAMTK_URL="https://kyfw.12306.cn/passport/web/auth/uamtk";
+    String PASSPORT_UAMTK_URL = "https://kyfw.12306.cn/passport/web/auth/uamtk";
 
     /**
      * 用户认证：get(appid)
      */
-    String PASSPORT_UAMTK_STATIC_URL="https://kyfw.12306.cn/passport/web/auth/uamtk-static";
+    String PASSPORT_UAMTK_STATIC_URL = "https://kyfw.12306.cn/passport/web/auth/uamtk-static";
 
     /**
      * 登录页面: get
      */
-    String LOGIN_INIT_CDN1="https://kyfw.12306.cn/otn/resources/login.html";
+    String LOGIN_INIT_CDN1 = "https://kyfw.12306.cn/otn/resources/login.html";
 
     /**
      * 用户退出: get
      */
-    String LOGIN_OUT="https://kyfw.12306.cn/otn/login/loginOut";
+    String LOGIN_OUT = "https://kyfw.12306.cn/otn/login/loginOut";
 
     /**
      * 查询乘车人信息: post
      */
-    String PASSENGERS_QUERY="https://kyfw.12306.cn/otn/passengers/query";
+    String PASSENGERS_QUERY = "https://kyfw.12306.cn/otn/passengers/query";
 
     /**
      * 获取用户信息: post(tk)
      */
-    String API_AUTH_UAMAUTHCLIENT="https://kyfw.12306.cn/otn/uamauthclient";
+    String API_AUTH_UAMAUTHCLIENT = "https://kyfw.12306.cn/otn/uamauthclient";
 
     /**
      * 删除乘车人: post
      */
-    String DEL_PASSENGERS="https://kyfw.12306.cn/otn/passengers/delete";
+    String DEL_PASSENGERS = "https://kyfw.12306.cn/otn/passengers/delete";
 
     /**
      * 新增乘车人: post
      */
-    String ADD_PASSENGERS="https://kyfw.12306.cn/otn/passengers/add";
+    String ADD_PASSENGERS = "https://kyfw.12306.cn/otn/passengers/add";
 
     /**
      * 查询我的订单: post
      */
-    String QUERY_MY_ORDER="https://kyfw.12306.cn/otn/queryOrder/queryMyOrder";
+    String QUERY_MY_ORDER = "https://kyfw.12306.cn/otn/queryOrder/queryMyOrder";
 
     /**
      * 查询未完成订单: post
      */
-    String QUERY_MY_ORDER_NO_COMPLETE="https://kyfw.12306.cn/otn/queryOrder/queryMyOrderNoComplete";
+    String QUERY_MY_ORDER_NO_COMPLETE = "https://kyfw.12306.cn/otn/queryOrder/queryMyOrderNoComplete";
 
     /**
      * 检查用户是否已登录: post: _json_att:
      */
-    String CHECK_USER="https://kyfw.12306.cn/otn/login/checkUser";
+    String CHECK_USER = "https://kyfw.12306.cn/otn/login/checkUser";
 
     /**
      * 提交坐席订单: post
      */
-    String SUBMIT_ORDER_REQUEST="https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest";
+    String SUBMIT_ORDER_REQUEST = "https://kyfw.12306.cn/otn/leftTicket/submitOrderRequest";
 
     /**
      * 初始化订单token: post
      */
-    String INIT_DC="https://kyfw.12306.cn/otn/confirmPassenger/initDc";
+    String INIT_DC = "https://kyfw.12306.cn/otn/confirmPassenger/initDc";
 
     /**
      * 检查订单信息: post
      */
-    String CHECK_ORDER_INFO="https://kyfw.12306.cn/otn/confirmPassenger/checkOrderInfo";
+    String CHECK_ORDER_INFO = "https://kyfw.12306.cn/otn/confirmPassenger/checkOrderInfo";
 
     /**
      * 检查排队人数和余票: post
      */
-    String GET_QUEUE_COUNT="https://kyfw.12306.cn/otn/confirmPassenger/getQueueCount";
+    String GET_QUEUE_COUNT = "https://kyfw.12306.cn/otn/confirmPassenger/getQueueCount";
 
     /**
-     * 确认订单提交: post
+     * <p>
+     * 快速通道
+     * </p>
+     * 快速检查排队人数和余票: post
      */
-    String CONFIRM_SINGLE_FOR_QUEUE="https://kyfw.12306.cn/otn/confirmPassenger/confirmSingleForQueue";
+    String GET_QUEUE_COUNT_ASYNC = "https://kyfw.12306.cn/otn/confirmPassenger/getQueueCountAsync";
+
+    /**
+     * 确认订单提交排队: post
+     */
+    String CONFIRM_SINGLE_FOR_QUEUE = "https://kyfw.12306.cn/otn/confirmPassenger/confirmSingleForQueue";
+
+    /**
+     * <p>
+     * 快速通道
+     * </p>
+     * 快速确认订单提交排队: post
+     */
+    String CONFIRM_SINGLE_FOR_QUEUE_ASYNC = "https://kyfw.12306.cn/otn/confirmPassenger/confirmSingleForQueueAsys";
 
     /**
      * 订单等待处理: get
      */
-    String ORDER_WAIT="https://kyfw.12306.cn/otn/confirmPassenger/queryOrderWaitTime?random={1}&tourFlag=dc&_json_att=&REPEAT_SUBMIT_TOKEN={2}";
+    String ORDER_WAIT = "https://kyfw.12306.cn/otn/confirmPassenger/queryOrderWaitTime?random={1}&tourFlag=dc&_json_att=&REPEAT_SUBMIT_TOKEN={2}";
 
     /**
      * 提交订单图片验证码校验: post
      */
-    String ORDER_IMG_CAPTCHA_CHECK="https://kyfw.12306.cn/otn/passcodeNew/checkRandCodeAnsyn";
+    String ORDER_IMG_CAPTCHA_CHECK = "https://kyfw.12306.cn/otn/passcodeNew/checkRandCodeAnsyn";
 
     /**
      * 获取浏览器标识参数: 云平台获取
      */
-    String API_GET_BROWSER_DEVICE_ID="https://12306-rail-id-v2.pjialin.com/";
+    String API_GET_BROWSER_DEVICE_ID = "https://12306-rail-id-v2.pjialin.com/";
 
     /**
      * 获取RAIL_EXPIRATION和RAIL_DEVICEID参数：get(algID:{1}、hashCode:{2}、timestamp:{3}当前时间毫秒数)
      */
-    String GET_RAIL_URL =   "https://kyfw.12306.cn/otn/HttpZF/logdevice?" +
+    String GET_RAIL_URL = "https://kyfw.12306.cn/otn/HttpZF/logdevice?" +
             "algID={1}&" +
             "hashCode={2}&" +
             "FMQw=0&" +

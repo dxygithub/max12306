@@ -57,6 +57,11 @@ public class OrderManage {
      */
     public static final Map<String, String> TOKEN_MAP = new HashMap<>(16);
 
+    /**
+     * 安全等待时间: 确认提交订单时需要等待
+     */
+    private String ifShowPassCodeTime = "";
+
     @Autowired
     private ConfigFileUtil config;
 
@@ -208,24 +213,24 @@ public class OrderManage {
      * @throws Exception
      */
     public ISPassCode startSubmitOrder(List<PassengerInfo> passengerInfos, String submitToken, String sessionId, String sig) throws Exception {
-        StringBuilder passengerTicketStrBUilder=new StringBuilder();
-        StringBuilder oldPassengerStrBUilder=new StringBuilder();
+        StringBuilder passengerTicketStrBUilder = new StringBuilder();
+        StringBuilder oldPassengerStrBUilder = new StringBuilder();
         passengerInfos.forEach(passengerInfo -> {
             // 乘车人车票字符串
-            passengerTicketStrBUilder.append(passengerInfo.getSeatType().getValue()+",");
-            passengerTicketStrBUilder.append("0"+",");
-            passengerTicketStrBUilder.append("1"+",");
-            passengerTicketStrBUilder.append(passengerInfo.getPassengerName()+",");
-            passengerTicketStrBUilder.append("1"+",");
-            passengerTicketStrBUilder.append(passengerInfo.getPassengerIdNo()+",");
-            passengerTicketStrBUilder.append(passengerInfo.getMobileNo()+",");
-            passengerTicketStrBUilder.append("N"+",");
-            passengerTicketStrBUilder.append(passengerInfo.getAllEncStr()+"_");
+            passengerTicketStrBUilder.append(passengerInfo.getSeatType().getValue() + ",");
+            passengerTicketStrBUilder.append("0" + ",");
+            passengerTicketStrBUilder.append("1" + ",");
+            passengerTicketStrBUilder.append(passengerInfo.getPassengerName() + ",");
+            passengerTicketStrBUilder.append("1" + ",");
+            passengerTicketStrBUilder.append(passengerInfo.getPassengerIdNo() + ",");
+            passengerTicketStrBUilder.append(passengerInfo.getMobileNo() + ",");
+            passengerTicketStrBUilder.append("N" + ",");
+            passengerTicketStrBUilder.append(passengerInfo.getAllEncStr() + "_");
 
             // 原有乘车人字符串
-            oldPassengerStrBUilder.append(passengerInfo.getPassengerName()+",");
-            oldPassengerStrBUilder.append("1"+",");
-            oldPassengerStrBUilder.append(passengerInfo.getPassengerIdNo()+",");
+            oldPassengerStrBUilder.append(passengerInfo.getPassengerName() + ",");
+            oldPassengerStrBUilder.append("1" + ",");
+            oldPassengerStrBUilder.append(passengerInfo.getPassengerIdNo() + ",");
             oldPassengerStrBUilder.append("1_");
         });
 
@@ -233,8 +238,8 @@ public class OrderManage {
         afterPassengerTicketStr = afterPassengerTicketStr.substring(0, afterPassengerTicketStr.lastIndexOf("_"));
         String afterOldPassengerStr = oldPassengerStrBUilder.toString();
 
-        LOGGER.info("======> 乘车人字符串: {}",afterPassengerTicketStr);
-        LOGGER.info("======> 原有乘车人字符串: {}",afterOldPassengerStr);
+        LOGGER.info("======> 乘车人字符串: {}", afterPassengerTicketStr);
+        LOGGER.info("======> 原有乘车人字符串: {}", afterOldPassengerStr);
 
         List<NameValuePair> formPail = new ArrayList<>();
         formPail.add(new BasicNameValuePair("cancel_flag", "2"));
@@ -263,39 +268,40 @@ public class OrderManage {
                     String message = json.get("messages", String.class);
                     if (SUCCESS == json.get("httpstatus", Integer.class) && json.get("status", Boolean.class)) {
                         JSONObject data = json.get("data", JSONObject.class);
-                        String errMsg=data.get("errMsg",String.class);
+                        String errMsg = data.get("errMsg", String.class);
                         if (data.get("submitStatus", Boolean.class)) {
                             // 是否需要验证码: Y 需要 / N 不需要
                             String ifShowPassCode = data.get("ifShowPassCode", String.class);
                             // 安全期时间: 单位 -> 毫秒
                             String ifShowPassCodeTime = data.get("ifShowPassCodeTime", String.class);
+                            this.ifShowPassCodeTime = ifShowPassCodeTime;
                             if (StringUtils.equals("Y", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交需要验证码...");
                                 LOGGER.info("======> 订单检查成功...");
-                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                // LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
                                 // 进入安全等待期
-                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
+                                // Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.YES;
                             } else if (StringUtils.equals("N", ifShowPassCode)) {
                                 LOGGER.info("======> 本次订单提交不需要验证码...");
                                 LOGGER.info("======> 订单检查成功...");
-                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                // LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
                                 // 进入安全等待期
-                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
+                                // Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
                             } else if (StringUtils.equals("X", ifShowPassCode)) {
-                                LOGGER.info("======> 本次订单提交预定失败，原因: {}...",errMsg);
+                                LOGGER.info("======> 本次订单提交预定失败，原因: {}...", errMsg);
                                 return ISPassCode.ERR;
                             } else {
                                 // LOGGER.info("======> 本次订单提交不需要验证码...");
                                 LOGGER.info("======> 订单检查成功...");
-                                LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
+                                // LOGGER.info("======> 本次订单提交需要等待安全期: {}/ms...", StringUtils.isBlank(ifShowPassCodeTime) ? "empty" : Integer.parseInt(ifShowPassCodeTime));
                                 // 进入安全等待期
-                                Thread.sleep(Long.valueOf(ifShowPassCodeTime));
+                                // Thread.sleep(Long.valueOf(ifShowPassCodeTime));
                                 return ISPassCode.NO;
                             }
                         } else {
-                            LOGGER.info("======> 本次订单提交预定失败，原因: {}...",errMsg);
+                            LOGGER.info("======> 本次订单提交预定失败，原因: {}...", errMsg);
                         }
                     } else {
                         LOGGER.info("======> 本次订单提交预定失败，原因: {}...", message);
@@ -338,6 +344,7 @@ public class OrderManage {
                 EntityUtils.consume(entity);
                 if (StringUtils.isNotBlank(result)) {
                     JSONObject json = JSONUtil.parseObj(result);
+                    String message = json.get("messages", String.class);
                     if (SUCCESS == json.get("httpstatus", Integer.class) && json.get("status", Boolean.class)) {
                         JSONObject data = json.get("data", JSONObject.class);
                         // 余票
@@ -349,7 +356,7 @@ public class OrderManage {
                         LOGGER.info("======> 排队成功: 你排在第{}位，目前余票还剩余: {}张...", count, ticket);
                         return OrderStatus.SUCCESS;
                     } else {
-                        LOGGER.info("======> 查询当前车票排队和余票信息失败...");
+                        LOGGER.info("======> 查询当前车票排队和余票信息失败，原因: {}...", message);
                         return OrderStatus.FAIL;
                     }
                 } else {
@@ -369,24 +376,24 @@ public class OrderManage {
      * @param passengerInfos 乘车人
      */
     public OrderStatus confirmSingleForQueue(String trainLocation, List<PassengerInfo> passengerInfos) throws Exception {
-        StringBuilder passengerTicketStrBUilder=new StringBuilder();
-        StringBuilder oldPassengerStrBUilder=new StringBuilder();
+        StringBuilder passengerTicketStrBUilder = new StringBuilder();
+        StringBuilder oldPassengerStrBUilder = new StringBuilder();
         passengerInfos.forEach(passengerInfo -> {
             // 乘车人车票字符串
-            passengerTicketStrBUilder.append(passengerInfo.getSeatType().getValue()+",");
-            passengerTicketStrBUilder.append("0"+",");
-            passengerTicketStrBUilder.append("1"+",");
-            passengerTicketStrBUilder.append(passengerInfo.getPassengerName()+",");
-            passengerTicketStrBUilder.append("1"+",");
-            passengerTicketStrBUilder.append(passengerInfo.getPassengerIdNo()+",");
-            passengerTicketStrBUilder.append(passengerInfo.getMobileNo()+",");
-            passengerTicketStrBUilder.append("N"+",");
-            passengerTicketStrBUilder.append(passengerInfo.getAllEncStr()+"_");
+            passengerTicketStrBUilder.append(passengerInfo.getSeatType().getValue() + ",");
+            passengerTicketStrBUilder.append("0" + ",");
+            passengerTicketStrBUilder.append("1" + ",");
+            passengerTicketStrBUilder.append(passengerInfo.getPassengerName() + ",");
+            passengerTicketStrBUilder.append("1" + ",");
+            passengerTicketStrBUilder.append(passengerInfo.getPassengerIdNo() + ",");
+            passengerTicketStrBUilder.append(passengerInfo.getMobileNo() + ",");
+            passengerTicketStrBUilder.append("N" + ",");
+            passengerTicketStrBUilder.append(passengerInfo.getAllEncStr() + "_");
 
             // 原有乘车人字符串
-            oldPassengerStrBUilder.append(passengerInfo.getPassengerName()+",");
-            oldPassengerStrBUilder.append("1"+",");
-            oldPassengerStrBUilder.append(passengerInfo.getPassengerIdNo()+",");
+            oldPassengerStrBUilder.append(passengerInfo.getPassengerName() + ",");
+            oldPassengerStrBUilder.append("1" + ",");
+            oldPassengerStrBUilder.append(passengerInfo.getPassengerIdNo() + ",");
             oldPassengerStrBUilder.append("1_");
         });
 
@@ -412,6 +419,9 @@ public class OrderManage {
 
         HttpPost post = HttpURL12306.httpPostBuild(HttpURLConstant12306.CONFIRM_SINGLE_FOR_QUEUE, formPail, url12306.getCookieStr(null));
         try (CloseableHttpClient client = HttpURL12306.httpClientBuild()) {
+            // 进入安全等待期
+            LOGGER.info("======> 本次订单提交确认需要等待安全期: {}/ms...", StringUtils.isBlank(this.ifShowPassCodeTime) ? "empty" : Integer.parseInt(this.ifShowPassCodeTime));
+            Thread.sleep(Long.valueOf(this.ifShowPassCodeTime));
             try (CloseableHttpResponse response = client.execute(post, HttpURL12306.context)) {
                 HttpEntity entity = response.getEntity();
                 String result = EntityUtils.toString(entity);
@@ -457,7 +467,7 @@ public class OrderManage {
         int sleepCount = 0;
         // 开始进入订单等待时间
         while (waitTime >= 0) {
-            if (sleepCount <= 20) {
+            if (sleepCount <= 30) {
                 HttpGet get = new HttpGet(HttpURLConstant12306.ORDER_WAIT.
                         replace("{1}", String.valueOf(System.currentTimeMillis())).
                         replace("{2}", TOKEN_MAP.get("submitToken")));
@@ -486,7 +496,7 @@ public class OrderManage {
                                     LOGGER.info("======> 订单异常，处理结果: {}...", message);
                                     break;
                                 }
-                                // 休眠1秒后继续获取订单等待信息，最高请求次数20次，超过20次视为订单失败
+                                // 休眠1秒后继续获取订单等待信息，最高请求次数30次，超过30次视为订单失败
                                 sleepCount++;
                                 Thread.sleep(1000L);
                             } else {
