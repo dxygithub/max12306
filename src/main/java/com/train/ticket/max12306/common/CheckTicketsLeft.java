@@ -1,5 +1,6 @@
 package com.train.ticket.max12306.common;
 
+import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.entity.PassengerInfo;
 import com.train.ticket.max12306.entity.TicketInfo;
 import com.train.ticket.max12306.enumeration.SeatType;
@@ -8,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,7 +46,7 @@ public class CheckTicketsLeft {
 
     private static int code = 0;
 
-    private TicketInfo ticketInfo;
+    private Map<String, Object> resultMap = new HashMap<>(16);
 
     /**
      * 余票监测线程池
@@ -65,7 +67,7 @@ public class CheckTicketsLeft {
 
     // 创建捡漏任务: 按照车次划分执行任务
     // 上海 - 太原
-    // 日期: 2020-09-17/2020-09-18/2020-09-19
+    // 日期: 2020-09-17
     // D1/D2/D3/D4
     // 张三/李四/王五
     // 商务座/一等座/二等座/高级软卧/软卧/硬卧/硬座/无座/动车二等卧/动车一等卧
@@ -78,12 +80,27 @@ public class CheckTicketsLeft {
      * @return Map<String, Object>
      */
     public Map<String, Object> startTicketsLfetTask() {
-        return null;
+        // 清空历史捡漏任务
+        this.resultMap.clear();
+        code = 0;
+        for (TicketInfo entity : ticketInfos) {
+            executorService.execute(createThreadTask(entity));
+        }
+        // 等待子线程执行完毕
+        try {
+            Thread.sleep(1000L);
+            // 添加乘车人信息
+            if (code == 1) {
+                resultMap.put("passengerInfos", passengerInfos);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return resultMap;
     }
 
     /**
      * 捡漏任务
-     *
      *
      * @param ticketInfo
      * @return
@@ -92,12 +109,23 @@ public class CheckTicketsLeft {
         return new Runnable() {
             @Override
             public void run() {
-
+                Map<String, Object> result = checkTicketInfo(ticketInfo);
+                synchronized (CheckTicketsLeft.class) {
+                    if (!CollectionUtils.isEmpty(result) && code == 0) {
+                        resultMap = result;
+                        code = 1;
+                    }
+                }
             }
         };
     }
 
-
+    /**
+     * 监测余票
+     *
+     * @param ticketInfo
+     * @return
+     */
     public Map<String, Object> checkTicketInfo(TicketInfo ticketInfo) {
         TicketInfo result = null;
         SeatType seatType = null;
@@ -177,9 +205,75 @@ public class CheckTicketsLeft {
                 // 监测到有余票，退出监测
                 resultMap.put("seatType", seatType);
                 resultMap.put("ticket", result);
+                resultMap.put("count", count);
                 break;
             }
         }
+        LOGGER.info("======> 当前执行线程：{}，余票监控结果 -> 车次：{}，余票数量：{}，座位：{}",
+                Thread.currentThread().getName(),
+                ticketInfo.getTrainCode(),
+                StringUtils.isBlank(count) ? "无票" : count,
+                seatType == null ? "无" : this.seatTypeConvert(seatType)
+        );
         return resultMap;
+    }
+
+    /**
+     * 座位转换
+     *
+     * @param seatType
+     * @return
+     */
+    public String seatTypeConvert(SeatType seatType) {
+        String seatTypeName = "";
+        switch (seatType) {
+            // 一等座
+            case FIRST_SEAT:
+                seatTypeName = "一等座";
+                break;
+            // 二等座
+            case SECOND_SEAT:
+                seatTypeName = "二等座";
+                break;
+            // 商务座
+            case BUSINESS_SEAT:
+                seatTypeName = "商务座";
+                break;
+            // 高级软卧
+            case HIGH_SOFT_SLEEP:
+                seatTypeName = "高级软卧";
+                break;
+            // 软卧
+            case SOFT_SLEEP:
+                seatTypeName = "软卧";
+                break;
+            // 硬卧
+            case HARD_SLEEP:
+                seatTypeName = "硬卧";
+                break;
+            // 软座
+            case SOFT_SEAT:
+                seatTypeName = "软座";
+                break;
+            // 硬座
+            case HARD_SEAT:
+                seatTypeName = "硬座";
+                break;
+            // 无座
+            case NONE_SEAT:
+                seatTypeName = "无座";
+                break;
+            // 动车: 二等卧
+            case SECOND_SOFT_SLEEP:
+                seatTypeName = "动车: 二等卧";
+                break;
+            // 动车: 一等卧
+            case FIRST_SOFT_SLEEP:
+                seatTypeName = "动车: 一等卧";
+                break;
+            default:
+                break;
+        }
+        return seatTypeName;
     }
 }

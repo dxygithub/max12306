@@ -117,7 +117,7 @@ public class CdnUtil {
             executorService.execute(createCheckCdnTask(cdn));
         }
         // 等待任务执行结束
-        Thread.sleep(10000);
+        Thread.sleep(15000);
         LOGGER.info("======> cdn检测结束 <======");
         LOGGER.info("======> 可用cdn: {}个 -> {} ...", isCdnCount, JSONUtil.toJsonStr(availableCdnList));
         LOGGER.info("======> 不可用cdn: {}个 ...", noCdnCount);

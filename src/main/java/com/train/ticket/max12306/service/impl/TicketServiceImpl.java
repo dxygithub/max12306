@@ -32,7 +32,8 @@ public class TicketServiceImpl implements TicketService {
         try {
             ticketInfos = url12306.parseTicketInfo(ticketRequest);
         } catch (Exception e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            return CollectionUtils.isEmpty(ticketInfos) ? Collections.emptyList() : ticketInfos;
         }
         return CollectionUtils.isEmpty(ticketInfos) ? Collections.emptyList() : ticketInfos;
     }

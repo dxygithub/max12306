@@ -154,13 +154,17 @@ public class HttpURL12306 {
                         replace("{2}", ticketRequest.getFromStationCode()).
                         replace("{3}", ticketRequest.getToStationCode()).
                         replace("{4}", ticketRequest.getTicketType().getValue()), getCookieStr(null));
+                RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(3000)
+                        .setConnectionRequestTimeout(1000).setSocketTimeout(3000).build();
+                // 设置请求等待超时
+                httpGet.setConfig(requestConfig);
                 try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet, context)) {
                     HttpEntity httpEntity = httpResponse.getEntity();
                     String result = EntityUtils.toString(httpEntity);
                     // 释放资源
                     EntityUtils.consume(httpEntity);
                     List<TicketInfo> list = new ArrayList<>();
-                    if (StringUtils.isNotBlank(result)) {
+                    if (StringUtils.isNotBlank(result) && httpResponse.getStatusLine().getStatusCode() == SUCCESS) {
                         JSONObject jsonObject = JSONUtil.parseObj(result);
                         int status = (int) jsonObject.get("httpstatus");
                         if (status == SUCCESS) {
@@ -189,7 +193,7 @@ public class HttpURL12306 {
                             }
                         }
                     }
-                    LOGGER.info("======> 解析车票信息失败...");
+                    LOGGER.info("======> 解析车票信息失败，状态：{}...", httpResponse.getStatusLine().getStatusCode());
                 }
             }
         }

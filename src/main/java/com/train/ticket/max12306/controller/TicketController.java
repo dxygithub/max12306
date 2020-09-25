@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
@@ -67,8 +69,8 @@ public class TicketController {
      * @param ticketsLeftRequest
      * @return
      */
-    @GetMapping("/max/monitorTicketsLeft")
-    public RestResult monitorTicketsLeft(CheckTicketsLeftRequest ticketsLeftRequest) {
+    @PostMapping("/max/monitorTicketsLeft")
+    public RestResult monitorTicketsLeft(@RequestBody CheckTicketsLeftRequest ticketsLeftRequest) {
         if (Objects.nonNull(ticketsLeftRequest)) {
             QueryTicketRequest ticketRequest = new QueryTicketRequest();
             // 目前只监测单日期余票
@@ -90,6 +92,8 @@ public class TicketController {
                 ticketsLeft.setSeatTypes(ticketsLeftRequest.getSeatTypes());
                 ticketsLeft.setPassengerInfos(ticketsLeftRequest.getPassengerInfos());
                 // 开始监测余票信息，如果存在则返回余票信息
+                Map<String, Object> result = ticketsLeft.startTicketsLfetTask();
+                return RestResult.SUCCESS().data(result).build();
             }
         }
         return RestResult.ERROR_PARAMS().build();
