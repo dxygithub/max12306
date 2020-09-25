@@ -1,7 +1,7 @@
 package com.train.ticket.max12306.service.impl;
 
 import cloud.gouyiba.core.constructor.QueryWrapper;
-import com.train.ticket.max12306.common.HttpURL12306;
+import com.train.ticket.max12306.request.HttpURL12306;
 import com.train.ticket.max12306.entity.StationInfo;
 import com.train.ticket.max12306.mapper.StationInfoMapper;
 import com.train.ticket.max12306.service.StationInfoService;

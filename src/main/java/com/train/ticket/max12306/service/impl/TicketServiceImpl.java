@@ -1,6 +1,6 @@
 package com.train.ticket.max12306.service.impl;
 
-import com.train.ticket.max12306.common.HttpURL12306;
+import com.train.ticket.max12306.request.HttpURL12306;
 import com.train.ticket.max12306.requestvo.QueryTicketPriceRequest;
 import com.train.ticket.max12306.requestvo.QueryTicketRequest;
 import com.train.ticket.max12306.entity.TicketInfo;

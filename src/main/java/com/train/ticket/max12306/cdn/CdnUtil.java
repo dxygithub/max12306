@@ -1,7 +1,8 @@
-package com.train.ticket.max12306.common;
+package com.train.ticket.max12306.cdn;
 
 import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
+import com.train.ticket.max12306.request.HttpURL12306;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;

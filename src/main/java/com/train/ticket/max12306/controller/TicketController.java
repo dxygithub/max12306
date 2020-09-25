@@ -1,7 +1,7 @@
 package com.train.ticket.max12306.controller;
 
-import com.train.ticket.max12306.common.CheckTicketsLeft;
-import com.train.ticket.max12306.common.HttpURL12306;
+import com.train.ticket.max12306.ticket.CheckTicketsLeft;
+import com.train.ticket.max12306.request.HttpURL12306;
 import com.train.ticket.max12306.requestvo.CheckTicketsLeftRequest;
 import com.train.ticket.max12306.requestvo.QueryTicketPriceRequest;
 import com.train.ticket.max12306.requestvo.QueryTicketRequest;

@@ -1,10 +1,8 @@
-package com.train.ticket.max12306.common;
+package com.train.ticket.max12306.ticket;
 
-import cn.hutool.json.JSONUtil;
 import com.train.ticket.max12306.entity.PassengerInfo;
 import com.train.ticket.max12306.entity.TicketInfo;
 import com.train.ticket.max12306.enumeration.SeatType;
-import com.train.ticket.max12306.requestvo.CheckTicketsLeftRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

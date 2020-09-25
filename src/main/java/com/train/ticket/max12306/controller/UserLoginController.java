@@ -1,6 +1,7 @@
 package com.train.ticket.max12306.controller;
 
 import com.train.ticket.max12306.common.*;
+import com.train.ticket.max12306.request.HttpURL12306;
 import com.train.ticket.max12306.requestvo.InitSlidePassPort;
 import com.train.ticket.max12306.requestvo.PassengersVo;
 import com.train.ticket.max12306.requestvo.UserLoginRequest;

@@ -2,8 +2,8 @@ package com.train.ticket.max12306.controller;
 
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
-import com.train.ticket.max12306.common.HttpURL12306;
-import com.train.ticket.max12306.common.HttpURLConstant12306;
+import com.train.ticket.max12306.request.HttpURL12306;
+import com.train.ticket.max12306.constant.HttpURLConstant12306;
 import com.train.ticket.max12306.common.RestResult;
 import com.train.ticket.max12306.entity.PassengerInfo;
 import com.train.ticket.max12306.entity.TicketInfo;

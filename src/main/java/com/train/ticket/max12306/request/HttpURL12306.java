@@ -1,9 +1,11 @@
-package com.train.ticket.max12306.common;
+package com.train.ticket.max12306.request;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.train.ticket.max12306.common.ConfigFileUtil;
+import com.train.ticket.max12306.constant.HttpURLConstant12306;
 import com.train.ticket.max12306.entity.*;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
 import com.train.ticket.max12306.exception.Max12306Exception;
