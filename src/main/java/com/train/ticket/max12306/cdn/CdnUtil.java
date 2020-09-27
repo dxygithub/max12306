@@ -12,10 +12,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,7 @@ public class CdnUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CdnUtil.class);
 
-    private static String cdnPath = "src/main/resources/cdn.txt";
+    // private static String cdnPath = "src/main/resources/cdn.txt";
 
     private static String host = "kyfw.12306.cn";
 
@@ -49,7 +48,7 @@ public class CdnUtil {
     private static Set<String> availableCdnList = new HashSet<>();
 
     // 用于执行cdn检测任务的线程池
-    private static ExecutorService executorService = Executors.newFixedThreadPool(1830/2);
+    private static ExecutorService executorService = Executors.newFixedThreadPool(1830 / 2);
 
     /**
      * 读取cdn文件
@@ -58,9 +57,9 @@ public class CdnUtil {
      * @throws Exception
      */
     public static Set<String> readerCdnFile() throws Exception {
-        File file = new File(cdnPath);
+        InputStream filePath=new ClassPathResource("cdn.txt").getInputStream();
         Set<String> cdnList = new HashSet<>();
-        try (BufferedReader bfr = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader bfr = new BufferedReader(new InputStreamReader(filePath))) {
             String lineContent = "";
             while (StringUtils.isNotBlank((lineContent = bfr.readLine()))) {
                 cdnList.add(lineContent);
