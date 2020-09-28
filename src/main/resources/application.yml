@@ -3,8 +3,8 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://139.224.81.29/max12306?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
-    username: root
+    url: jdbc:mysql://127.0.0.1/max12306?characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+    username: xxxxxxx
     password: ENC(a5rsd8uK8dVi94FUIw0AQdZSId+S8j1v)
 
 mybatis-max:
