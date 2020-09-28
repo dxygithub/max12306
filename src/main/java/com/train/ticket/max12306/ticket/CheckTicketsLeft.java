@@ -182,7 +182,7 @@ public class CheckTicketsLeft {
 
             if (StringUtils.isNotBlank(count)) {
                 // 余票分为: 有/无/number
-                if (!StringUtils.equals("无", count)) {
+                if (!StringUtils.equals("无", count) && !StringUtils.equals("*", count)) {
                     if (StringUtils.equals("有", count)) {
                         // 有票，符合条件
                         result = ticketInfo;
