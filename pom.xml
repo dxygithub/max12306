@@ -45,7 +45,7 @@
         </dependency>
         <!--SQLTools-->
 
-        <!--httpUtils-->
+        <!--httpUtils -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
