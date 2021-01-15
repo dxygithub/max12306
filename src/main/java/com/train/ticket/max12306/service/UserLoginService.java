@@ -97,5 +97,9 @@ public interface UserLoginService {
      */
     RestResult getOrderNoComplete();
 
-
+    /**
+     * 获取登录时用于验证的appkey: 初始化滑块验证
+     * @return
+     */
+    RestResult getLoginAppKey();
 }

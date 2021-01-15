@@ -38,6 +38,15 @@ public class UserLoginController {
     }
 
     /**
+     * 获取登录校验的AppKey
+     * @return
+     */
+    @GetMapping("/max/getLoginAppKey")
+    public RestResult getLoginAppKey(){
+        return userLoginService.getLoginAppKey();
+    }
+
+    /**
      * 初始化滑块验证
      *
      * @param passPort

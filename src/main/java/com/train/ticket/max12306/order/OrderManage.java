@@ -513,7 +513,7 @@ public class OrderManage {
                 break;
             }
         }
-        return sequenceNo;
+        return StringUtils.isBlank(sequenceNo) ? message : sequenceNo;
     }
 
 

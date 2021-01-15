@@ -183,11 +183,11 @@ public class OrderManageController {
                     if (confirmOrderRes == OrderStatus.SUCCESS) {
                         // 开始进入订单等待期
                         String sequenceNo = order.orderWait();
-                        if (StringUtils.isNotBlank(sequenceNo)) {
+                        if (StringUtils.isNotBlank(sequenceNo)&&sequenceNo.indexOf("E")!=-1) {
                             LOGGER.info("======> 恭喜您订票成功，订单号为：{}, 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付！", sequenceNo);
                             return RestResult.SUCCESS().data(sequenceNo).isSlidePassCode(0).message(String.format("恭喜您订票成功，订单号为：%s, 请立即打开浏览器登录12306，访问‘未完成订单’，在30分钟内完成支付！", sequenceNo)).build();
                         } else {
-                            return RestResult.SERVER_ERROR().data(orderQueueRes).message("订单等待失败或超时").build();
+                            return RestResult.SERVER_ERROR().data(orderQueueRes).message(sequenceNo).build();
                         }
                     } else {
                         return RestResult.SERVER_ERROR().data(orderQueueRes).message("确认订单失败").build();

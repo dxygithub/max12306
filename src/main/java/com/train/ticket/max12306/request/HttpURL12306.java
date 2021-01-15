@@ -37,6 +37,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import javax.net.ssl.SSLContext;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -343,7 +345,9 @@ public class HttpURL12306 {
                     if (json.get("result_code", String.class).equals("0")) {
                         String ifCheckSlidePasscodeToken = json.get("if_check_slide_passcode_token", String.class);
                         cacheCookie(cookieStore.getCookies());
-                        return ifCheckSlidePasscodeToken;
+                        return ifCheckSlidePasscodeToken + "--" + json.get("result_code", String.class);
+                    } else {
+                        return json.get("result_code", String.class);
                     }
                 }
             }
@@ -781,6 +785,87 @@ public class HttpURL12306 {
     }
 
     /**
+     * 获取登录时初始化校验的appkey
+     *
+     * @return
+     */
+    public static String getLoginInitAppKey() throws Exception {
+        HttpGet httpGet = new HttpGet(HttpURLConstant12306.LOGIN_INIT_CDN1);
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+        httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+        try (CloseableHttpClient client = httpClientBuild()) {
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取最新的登录脚本
+     *
+     * @return
+     */
+    public static String getLoginNewScript(String url) throws Exception {
+        HttpGet httpGet = new HttpGet(url);
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+        httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+        httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+        httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+        try (CloseableHttpClient client = httpClientBuild()) {
+            try (CloseableHttpResponse response = client.execute(httpGet)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 校验登录滑块验证是否开启
+     *
+     * @param formPail
+     * @return
+     */
+    public static String slidePassportValidate(List<NameValuePair> formPail) throws Exception {
+        HttpPost httpPost = new HttpPost(HttpURLConstant12306.SLIDE_PASSPORT_URL);
+        httpPost.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
+        httpPost.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
+        httpPost.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
+        httpPost.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
+        httpPost.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
+        UrlEncodedFormEntity formEntity = new UrlEncodedFormEntity(formPail, "UTF-8");
+        httpPost.setEntity(formEntity);
+        try (CloseableHttpClient client = httpClientBuild()) {
+            try (CloseableHttpResponse response = client.execute(httpPost)) {
+                HttpEntity entity = response.getEntity();
+                String result = EntityUtils.toString(entity);
+                // 释放资源
+                EntityUtils.consume(entity);
+                if (StringUtils.isNotBlank(result)) {
+                    return result;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 用户退出登录
      *
      * @throws Exception
@@ -1071,6 +1156,7 @@ public class HttpURL12306 {
         String cdn = cdnList.get(index);
         LOGGER.info("======> Get: 服务器地址: {} <======", cdn);
 
+        //HttpGet httpGet = new HttpGet(url);
         HttpGet httpGet = new HttpGet(url.replace("kyfw.12306.cn", cdn));
         httpGet.addHeader("Host", host);
         httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());

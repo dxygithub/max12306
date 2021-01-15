@@ -23,8 +23,11 @@ public enum HttpHeaderParamter {
     ACCEPT_LANGUAGE("Accept-Language","zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7"),
     /**
      * 浏览器标识，后期考虑换成动态切换，防止12306拦截
+     * Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36
+     * Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Safari/537.36 Core/1.70.3775.400 QQBrowser/10.6.4208.400
+     *
      */
-    USER_AGENT("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.25 Safari/537.36 Core/1.70.3775.400 QQBrowser/10.6.4208.400"),
+    USER_AGENT("User-Agent","Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.75 Safari/537.36"),
 
     X_REQUESTED_WITH("X-Requested-With","XMLHttpRequest"),
 

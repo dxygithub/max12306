@@ -10,6 +10,16 @@ package com.train.ticket.max12306.constant;
 public interface HttpURLConstant12306 {
 
     /**
+     * 登录脚本: get
+     */
+    String LOGIN_NEW_SCRIPT="https://kyfw.12306.cn/otn/resources/js/login_new_v%s.js";
+
+    /**
+     * 登录滑块校验
+     */
+    String SLIDE_PASSPORT_URL="https://kyfw.12306.cn/passport/web/slide-passcode";
+
+    /**
      * 车站信息url:get(无需参数)
      */
     String STATION_INFO_URL = "https://kyfw.12306.cn/otn/resources/js/framework/station_name.js?station_version=1.9151";
@@ -43,7 +53,7 @@ public interface HttpURLConstant12306 {
     /**
      * 车票查询url: get(出发日期:{1}、始发站:{2}、终点站:{3}、车票类型:{4})
      */
-    String TICKET_QUERY_URL = "https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={1}&leftTicketDTO.from_station={2}&leftTicketDTO.to_station={3}&purpose_codes={4}";
+    String TICKET_QUERY_URL = "https://kyfw.12306.cn/otn/leftTicket/queryT?leftTicketDTO.train_date={1}&leftTicketDTO.from_station={2}&leftTicketDTO.to_station={3}&purpose_codes={4}";
 
     /**
      * 车票价格查询url: get(列车号:{1}、出发站站序:{2}、到达站站序{3}、座位类型{4}、出发日期:{5})

@@ -16,6 +16,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
@@ -29,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @ClassName UserLoginServiceImpl
@@ -294,6 +297,41 @@ public class UserLoginServiceImpl implements UserLoginService {
             }
         }
         return RestResult.ERROR_PARAMS().message("参数为空").build();
+    }
+
+    /**
+     * 获取登录时用于验证的appkey: 初始化滑块验证
+     *
+     * @return
+     */
+    @Override
+    public RestResult getLoginAppKey() {
+        String login_new_js_url = "";
+        String appKey = "";
+        try {
+            String loginHtmlScript = HttpURL12306.getLoginInitAppKey();
+            Pattern p1 = Pattern.compile("src\\=\"js\\/login_new_v(.*?)\\.js\"");
+            Matcher m1 = p1.matcher(loginHtmlScript);
+            while (m1.find()) {
+                login_new_js_url = m1.group(1);
+            }
+
+            if (StringUtils.isNotBlank(login_new_js_url)) {
+                login_new_js_url = String.format(HttpURLConstant12306.LOGIN_NEW_SCRIPT, login_new_js_url);
+                String loginNewScript = HttpURL12306.getLoginNewScript(login_new_js_url);
+                if (StringUtils.isNotBlank(loginNewScript)) {
+                    Pattern p2 = Pattern.compile("appkey \\= '(.*?)';");
+                    Matcher m2 = p2.matcher(loginNewScript);
+                    while (m2.find()) {
+                        appKey = m2.group(1);
+                    }
+                    LOGGER.info("======> login_init_appkey success：{}",appKey);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return StringUtils.isBlank(appKey) ? RestResult.SUCCESS().build() : RestResult.SUCCESS().data(appKey).build();
     }
 
     /**
