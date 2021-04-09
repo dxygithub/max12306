@@ -52,8 +52,10 @@ public interface HttpURLConstant12306 {
 
     /**
      * 车票查询url: get(出发日期:{1}、始发站:{2}、终点站:{3}、车票类型:{4})
+     * queryT: 这个url地址有时候会变，如果查询车票返回302需要检查是否这里出现了问题
+     * query: 默认的url地址，如果查询车票返回302，可以尝试替换为queryT
      */
-    String TICKET_QUERY_URL = "https://kyfw.12306.cn/otn/leftTicket/queryT?leftTicketDTO.train_date={1}&leftTicketDTO.from_station={2}&leftTicketDTO.to_station={3}&purpose_codes={4}";
+    String TICKET_QUERY_URL = "https://kyfw.12306.cn/otn/leftTicket/query?leftTicketDTO.train_date={1}&leftTicketDTO.from_station={2}&leftTicketDTO.to_station={3}&purpose_codes={4}";
 
     /**
      * 车票价格查询url: get(列车号:{1}、出发站站序:{2}、到达站站序{3}、座位类型{4}、出发日期:{5})

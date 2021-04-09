@@ -8,6 +8,7 @@ import com.train.ticket.max12306.common.ConfigFileUtil;
 import com.train.ticket.max12306.constant.HttpURLConstant12306;
 import com.train.ticket.max12306.entity.*;
 import com.train.ticket.max12306.enumeration.HttpHeaderParamter;
+import com.train.ticket.max12306.enumeration.UseCdnProxy;
 import com.train.ticket.max12306.exception.Max12306Exception;
 import com.train.ticket.max12306.requestvo.*;
 import org.apache.commons.lang3.StringUtils;
@@ -107,7 +108,7 @@ public class HttpURL12306 {
      */
     public List<StationInfo> parseStationInfo() throws Exception {
         try (CloseableHttpClient httpClient = httpClientBuild()) {
-            HttpGet httpGet = httpGetBuild(HttpURLConstant12306.STATION_INFO_URL, getCookieStr(null));
+            HttpGet httpGet = httpGetBuild(HttpURLConstant12306.STATION_INFO_URL, getCookieStr(null), UseCdnProxy.YES);
             try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet, context)) {
                 HttpEntity httpEntity = httpResponse.getEntity();
                 String result = EntityUtils.toString(httpEntity);
@@ -157,7 +158,7 @@ public class HttpURL12306 {
                         replace("{1}", ticketRequest.getFromDate()).
                         replace("{2}", ticketRequest.getFromStationCode()).
                         replace("{3}", ticketRequest.getToStationCode()).
-                        replace("{4}", ticketRequest.getTicketType().getValue()), getCookieStr(null));
+                        replace("{4}", ticketRequest.getTicketType().getValue()), getCookieStr(null), UseCdnProxy.NO);
                 RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(3000)
                         .setConnectionRequestTimeout(1000).setSocketTimeout(3000).build();
                 // 设置请求等待超时
@@ -219,7 +220,7 @@ public class HttpURL12306 {
                         replace("{2}", ticketPriceRequest.getFromStationNo()).
                         replace("{3}", ticketPriceRequest.getToStationNo()).
                         replace("{4}", ticketPriceRequest.getSeatTypes()).
-                        replace("{5}", ticketPriceRequest.getTrainDate()), getCookieStr(null));
+                        replace("{5}", ticketPriceRequest.getTrainDate()), getCookieStr(null), UseCdnProxy.YES);
                 try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet, context)) {
                     HttpEntity httpEntity = httpResponse.getEntity();
                     String result = EntityUtils.toString(httpEntity);
@@ -259,7 +260,7 @@ public class HttpURL12306 {
             HttpGet httpGet = httpGetBuild(HttpURLConstant12306.GET_CAPTCHA.
                     replace("{1}", currentMills).
                     replace("{2}", currentMills).
-                    replace("{3}", currentMills), getCookieStr(null));
+                    replace("{3}", currentMills), getCookieStr(null), UseCdnProxy.YES);
             try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet, context)) {
                 HttpEntity entity = httpResponse.getEntity();
                 String result = EntityUtils.toString(entity);
@@ -298,7 +299,7 @@ public class HttpURL12306 {
             HttpGet httpGet = httpGetBuild(HttpURLConstant12306.CHECK_CAPTCHA.
                     replace("{xyz}", answer).
                     replace("{1}", timer).
-                    replace("{2}", timer), getCookieStr(null));
+                    replace("{2}", timer), getCookieStr(null), UseCdnProxy.YES);
             try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet, context)) {
                 HttpEntity entity = httpResponse.getEntity();
                 String result = EntityUtils.toString(entity);
@@ -872,7 +873,7 @@ public class HttpURL12306 {
      */
     public void loginOut() throws Exception {
         try (CloseableHttpClient client = httpClientBuild()) {
-            HttpGet get = httpGetBuild(HttpURLConstant12306.LOGIN_OUT, getCookieStr(null));
+            HttpGet get = httpGetBuild(HttpURLConstant12306.LOGIN_OUT, getCookieStr(null), UseCdnProxy.YES);
             // 执行退出，正常情况12306会重定向到登录页面
             client.execute(get);
             LOGGER.info("======> 退出成功...");
@@ -1151,20 +1152,26 @@ public class HttpURL12306 {
      * @param cookie
      * @return
      */
-    public static HttpGet httpGetBuild(String url, String cookie) {
-        int index = getRandomIndex();
-        String cdn = cdnList.get(index);
-        LOGGER.info("======> Get: 服务器地址: {} <======", cdn);
+    public static HttpGet httpGetBuild(String url, String cookie, UseCdnProxy cdnProxy) {
+        String cdn = "127.0.0.1";
 
-        //HttpGet httpGet = new HttpGet(url);
-        HttpGet httpGet = new HttpGet(url.replace("kyfw.12306.cn", cdn));
-        httpGet.addHeader("Host", host);
+        HttpGet httpGet = new HttpGet(url);
+
+        if (UseCdnProxy.YES == cdnProxy) {
+            int index = getRandomIndex();
+            cdn = cdnList.get(index);
+            url.replace("kyfw.12306.cn", cdn);
+            httpGet.addHeader("Host", host);
+        }
+
         httpGet.addHeader(HttpHeaderParamter.ACCEPT.getKey(), HttpHeaderParamter.ACCEPT.getValue());
         httpGet.addHeader(HttpHeaderParamter.ACCEPT_ENCODING.getKey(), HttpHeaderParamter.ACCEPT_ENCODING.getValue());
         httpGet.addHeader(HttpHeaderParamter.ACCEPT_LANGUAGE.getKey(), HttpHeaderParamter.ACCEPT_LANGUAGE.getValue());
         httpGet.addHeader(HttpHeaderParamter.USER_AGENT.getKey(), HttpHeaderParamter.USER_AGENT.getValue());
         httpGet.addHeader(HttpHeaderParamter.X_REQUESTED_WITH.getKey(), HttpHeaderParamter.X_REQUESTED_WITH.getValue());
         httpGet.addHeader(HttpHeaderParamter.COOKIE.getKey(), cookie);
+
+        LOGGER.info("======> Get: 服务器地址: {} <======", cdn);
         return httpGet;
     }
 
